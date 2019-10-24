@@ -28,6 +28,8 @@ def compare_folders(dir1, dir2):
     src_dir = Path(dir1)
     src_dir_parent = src_dir.parent
     comparison_dir = Path(src_dir_parent, 'comparisons', duplicate_folder)
+    if not os.path.isdir(Path(src_dir_parent, 'comparisons')):
+        os.mkdir(Path(src_dir_parent, 'comparisons'))
 
     CompareInfo = namedtuple('CompareInfo', 'dir1, dir2, timestamp, move_dir')
     compareInfo = CompareInfo(dir1, dir2, timestamp_str, comparison_dir)
@@ -48,6 +50,6 @@ def move_duplicate_files(dcmp, compareInfo):
 
 
 mode = 'compare'
-dir1 = '/Volumes/Seagate 2/Photos + Videos/Exported Photo Library/2019/09_30 September'
-dir2 = '/Volumes/Seagate 2/Photos + Videos/Exported Photo Library/2019/09 September'
+dir1 = '/Volumes/Seagate 2/Photos + Videos/Exported Photo Library/2019/10_23 October'
+dir2 = '/Volumes/Seagate 2/Photos + Videos/Exported Photo Library/2019/10 October'
 compare_folders(dir1, dir2)
