@@ -7,9 +7,10 @@ from collections import namedtuple
 
 
 class Comparator:
+    move_duplicates = True
 
     def __init__(self):
-        print('Building Comparator')
+        self.move_duplicates = True
 
     def print_diff_files(self, dcmp):
         for name in dcmp.diff_files:
@@ -19,6 +20,17 @@ class Comparator:
             self.print_diff_files(sub_dcmp)
 
     def compare_folders(self, dir1, dir2):
+
+        if dir1 == '':
+            if dir2 == '':
+                print('dir1 and dir2 are empty')
+            else:
+                print('dir1 is empty')
+            return
+
+        if dir2 == '':
+            print('dir2 is empty')
+            return
 
         dcmp = filecmp.dircmp(dir1, dir2)
         self.print_diff_files(dcmp)
@@ -39,7 +51,8 @@ class Comparator:
         CompareInfo = namedtuple('CompareInfo', 'dir1, dir2, timestamp, move_dir')
         compareInfo = CompareInfo(dir1, dir2, timestamp_str, comparison_dir)
 
-        self.move_duplicate_files(dcmp, compareInfo)
+        if self.move_duplicates:
+            self.move_duplicate_files(dcmp, compareInfo)
 
     def move_duplicate_files(self, dcmp, compare_info):
 
