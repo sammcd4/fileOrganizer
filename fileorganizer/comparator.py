@@ -24,7 +24,7 @@ class Comparator:
     move_duplicates = True
 
     def __init__(self):
-        self.move_duplicates = False
+        self.move_duplicates = True
 
     def print_diff_files(self, dcmp):
         for name in dcmp.diff_files:
@@ -84,7 +84,7 @@ class Comparator:
         compareInfo = CompareInfo(dir1, dir2, timestamp_str, comparison_dir)
 
         if self.move_duplicates:
-            self.move_duplicate_files2(compareInfo)
+            self.move_duplicate_files(dcmp, compareInfo)
 
     def move_duplicate_files(self, dcmp, compare_info):
 
