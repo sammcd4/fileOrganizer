@@ -28,7 +28,7 @@ class Comparator:
 
     def print_diff_files(self, dcmp):
         for name in dcmp.diff_files:
-            print("diff_file {} found in {} and {}".format(name, dcmp.left, dcmp.right))
+            print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, dcmp.left, dcmp.right))
 
         for sub_dcmp in dcmp.subdirs.values():
             self.print_diff_files(sub_dcmp)
@@ -89,7 +89,7 @@ class Comparator:
     def move_duplicate_files(self, dcmp, compare_info):
 
         for name in dcmp.same_files:
-            print("same_file {} found in {} and {}".format(name, dcmp.left, dcmp.right))
+            print("same_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, dcmp.left, dcmp.right))
             md = compare_info.move_dir
             if not os.path.isdir(md):
                 os.mkdir(md)
