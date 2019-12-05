@@ -16,6 +16,9 @@ class Dircmp(filecmp.dircmp):
         Find out differences between common files.
         Ensure we are using content comparison with shallow=False.
         """
+
+        # TODO Compare files of multiple similar file extensions
+        # Possibly copy to a temp directory as a new name and then compare with that file instead?
         fcomp = filecmp.cmpfiles(self.left, self.right, self.common_files, shallow=False)
         self.same_files, self.diff_files, self.funny_files = fcomp
 
@@ -78,7 +81,7 @@ class Comparator:
         src_dir_parent = src_dir.parent
         comparison_dir = Path(src_dir_parent, 'comparisons', duplicate_folder)
         if not os.path.isdir(Path(src_dir_parent, 'comparisons')):
-            os.mkdir(Path(src_dir_parent, 'comparisons'))
+            os.makedirs(Path(src_dir_parent, 'comparisons'))
 
         CompareInfo = namedtuple('CompareInfo', 'dir1, dir2, timestamp, move_dir')
         compareInfo = CompareInfo(dir1, dir2, timestamp_str, comparison_dir)
