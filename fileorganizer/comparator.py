@@ -91,12 +91,21 @@ class Comparator:
 
     def move_duplicate_files(self, dcmp, compare_info):
 
+        # TODO name could be different and still be a duplicate - how to manage this?
         for name in dcmp.same_files:
-            print("same_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, dcmp.left, dcmp.right))
-            md = compare_info.move_dir
+            print("same_file found: {}\n\tsrc {}\n\tdup {}".format(name, Path(dcmp.left, name), Path(dcmp.right, name)))
+
+            right_relative = Path(dcmp.right).relative_to(compare_info.dir2)
+            md = Path(compare_info.move_dir, str(right_relative))
             if not os.path.isdir(md):
-                os.mkdir(md)
+                os.makedirs(md)
             shutil.move(Path(dcmp.left, name), Path(md, name))
+            print("\tmvd {}".format(Path(md, name)))
+
+            # remove the directory if all files have been moved
+            if not os.listdir(dcmp.left):
+                os.rmdir(dcmp.left)
+
 
         for sub_dcmp in dcmp.subdirs.values():
             self.move_duplicate_files(sub_dcmp, compare_info)
