@@ -102,6 +102,7 @@ class Comparator:
             shutil.move(Path(dcmp.left, name), Path(md, name))
             print("\tmvd {}".format(Path(md, name)))
 
+            # TODO apparently not all subdirectories are being removed
             # remove the directory if all files have been moved
             if not os.listdir(dcmp.left):
                 os.rmdir(dcmp.left)
