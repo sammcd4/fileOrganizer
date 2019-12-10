@@ -1,9 +1,16 @@
 import fileorganizer as fo
-import fileorganizer.comparator as fo_c
+import fileorganizer.comparator as foc
 
 mode = 'compare'
-dir1 = '/Users/mcdonaldfamily/Documents/music to delete copy 3'
-dir2 = '/Users/mcdonaldfamily/Music/iTunes/iTunes Media/Music'
 
-comp = fo_c.Comparator()
-comp.compare_folders(dir1, dir2)
+if mode == 'compare':
+    print('\nRunning comparision operation\n')
+
+    duplicate_dir = '/Users/mcdonaldfamily/Documents/Missy + Teresa Raw'
+    dir_untouched_original = '/Volumes/Seagate 2/Photos + Videos/2019_05_Zac Teresa Syd'
+
+    comp = foc.Comparator()
+    comp.compare_folders(duplicate_dir, dir_untouched_original)
+
+elif mode == 'rename':
+    print('\nRunning Rename operation\n')
