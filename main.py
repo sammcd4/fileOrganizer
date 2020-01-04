@@ -6,10 +6,11 @@ mode = 'compare'
 if mode == 'compare':
     print('\nRunning comparision operation\n')
 
-    duplicate_dir = '/Users/mcdonaldfamily/Documents/Missy + Teresa Raw'
-    dir_untouched_original = '/Volumes/Seagate 2/Photos + Videos/2019_05_Zac Teresa Syd'
+    duplicate_dir = '/Users/mcdonaldfamily/Documents/music to delete copy'
+    dir_untouched_original = '/Users/mcdonaldfamily/Documents/music to delete'
 
-    comp = foc.Comparator()
+    move_files = True
+    comp = foc.Comparator(move_files)
     comp.compare_folders(duplicate_dir, dir_untouched_original)
 
 elif mode == 'rename':

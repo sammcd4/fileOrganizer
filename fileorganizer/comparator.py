@@ -24,17 +24,35 @@ class Dircmp(filecmp.dircmp):
 
 
 class Comparator:
-    move_duplicates = True
 
-    def __init__(self):
-        self.move_duplicates = True
+    def __init__(self, move_duplicates=True):
+        self.move_duplicates = move_duplicates
+        self.duplicates_found = False
+        self.left_only_found = False
+        self.right_only_found = False
 
-    def print_diff_files(self, dcmp):
+    def print_comparison(self, dcmp):
+        # alert of diff files found in these directories
         for name in dcmp.diff_files:
             print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, dcmp.left, dcmp.right))
 
+        # print out files unique to left directory
+        if dcmp.left_only:
+            print("Only found in dir 1: {}\n".format(dcmp.left))
+            self.left_only_found = True
+
+        for name in dcmp.left_only:
+            print("\t{}".format(name))
+
+        if dcmp.right_only:
+            print("Only found in dir2: {}\n".format(dcmp.right))
+            self.right_only_found = True
+
+        for name in dcmp.right_only:
+            print("\t{}".format(name))
+
         for sub_dcmp in dcmp.subdirs.values():
-            self.print_diff_files(sub_dcmp)
+            self.print_comparison(sub_dcmp)
 
     def compare_folders(self, dir1, dir2):
 
@@ -68,7 +86,7 @@ class Comparator:
             print('Errors:{}'.format(errors))
         
         dcmp = Dircmp(dir1, dir2)
-        self.print_diff_files(dcmp)
+        self.print_comparison(dcmp)
 
         # get current time for duplicates folder name
         obj = datetime.now()
@@ -86,8 +104,15 @@ class Comparator:
         CompareInfo = namedtuple('CompareInfo', 'dir1, dir2, timestamp, move_dir')
         compareInfo = CompareInfo(dir1, dir2, timestamp_str, comparison_dir)
 
-        if self.move_duplicates:
-            self.move_duplicate_files(dcmp, compareInfo)
+        if dcmp.same_files:
+            self.duplicates_found = True
+        else:
+            print('No duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}'.format(dcmp.left, dcmp.right))
+
+        # TODO: left_only printout to know if there are files in dir1 that are not in dir2
+        # TODO: rigt_only printout to know if there are files in dir2 that are not in dir1
+
+        self.move_duplicate_files(dcmp, compareInfo)
 
     def move_duplicate_files(self, dcmp, compare_info):
 
@@ -95,18 +120,18 @@ class Comparator:
         for name in dcmp.same_files:
             print("same_file found: {}\n\tsrc {}\n\tdup {}".format(name, Path(dcmp.left, name), Path(dcmp.right, name)))
 
-            right_relative = Path(dcmp.right).relative_to(compare_info.dir2)
-            md = Path(compare_info.move_dir, str(right_relative))
-            if not os.path.isdir(md):
-                os.makedirs(md)
-            shutil.move(Path(dcmp.left, name), Path(md, name))
-            print("\tmvd {}".format(Path(md, name)))
+            if self.move_duplicates:
+                right_relative = Path(dcmp.right).relative_to(compare_info.dir2)
+                md = Path(compare_info.move_dir, str(right_relative))
+                if not os.path.isdir(md):
+                    os.makedirs(md)
+                shutil.move(Path(dcmp.left, name), Path(md, name))
+                print("\tmvd {}".format(Path(md, name)))
 
-            # TODO apparently not all subdirectories are being removed
-            # remove the directory if all files have been moved
-            if not os.listdir(dcmp.left):
-                os.rmdir(dcmp.left)
-
+                # TODO apparently not all subdirectories are being removed
+                # remove the directory if all files have been moved
+                if not os.listdir(dcmp.left):
+                    os.rmdir(dcmp.left)
 
         for sub_dcmp in dcmp.subdirs.values():
             self.move_duplicate_files(sub_dcmp, compare_info)
