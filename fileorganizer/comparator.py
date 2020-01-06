@@ -28,31 +28,24 @@ class Comparator:
     def __init__(self, move_duplicates=True):
         self.move_duplicates = move_duplicates
         self.duplicates_found = False
-        self.left_only_found = False
-        self.right_only_found = False
+        self.left_only_found = []
+        self.right_only_found = []
 
-    def print_comparison(self, dcmp):
+    def parse_comparison(self, dcmp):
         # alert of diff files found in these directories
         for name in dcmp.diff_files:
             print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, dcmp.left, dcmp.right))
 
-        # print out files unique to left directory
-        if dcmp.left_only:
-            print("Only found in dir 1: {}\n".format(dcmp.left))
-            self.left_only_found = True
-
         for name in dcmp.left_only:
-            print("\t{}".format(name))
-
-        if dcmp.right_only:
-            print("Only found in dir2: {}\n".format(dcmp.right))
-            self.right_only_found = True
+            #print("\t{}".format(name))
+            self.left_only_found.append(Path(dcmp.left, name))
 
         for name in dcmp.right_only:
-            print("\t{}".format(name))
+            #print("\t{}".format(name))
+            self.right_only_found.append(Path(dcmp.right, name))
 
         for sub_dcmp in dcmp.subdirs.values():
-            self.print_comparison(sub_dcmp)
+            self.parse_comparison(sub_dcmp)
 
     def compare_folders(self, dir1, dir2):
 
@@ -86,7 +79,7 @@ class Comparator:
             print('Errors:{}'.format(errors))
         
         dcmp = Dircmp(dir1, dir2)
-        self.print_comparison(dcmp)
+        self.parse_comparison(dcmp)
 
         # get current time for duplicates folder name
         obj = datetime.now()
@@ -107,12 +100,20 @@ class Comparator:
         if dcmp.same_files:
             self.duplicates_found = True
         else:
-            print('No duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}'.format(dcmp.left, dcmp.right))
-
-        # TODO: left_only printout to know if there are files in dir1 that are not in dir2
-        # TODO: rigt_only printout to know if there are files in dir2 that are not in dir1
+            print('\nNo duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}\n'.format(dcmp.left, dcmp.right))
 
         self.move_duplicate_files(dcmp, compareInfo)
+
+        if self.left_only_found:
+            print("Unique files in dir 1: {}\n".format(dir1))
+            for filepath in self.left_only_found:
+                print("\t{}".format(filepath))
+
+        # Do we need to display all of these files? TODO: Make a flag for this
+        if False and self.right_only_found:
+            print("Unique files in dir 2: {}\n".format(dir1))
+            for filepath in self.right_only_found:
+                print("\t{}".format(filepath))
 
     def move_duplicate_files(self, dcmp, compare_info):
 

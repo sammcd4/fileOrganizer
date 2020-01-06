@@ -6,8 +6,8 @@ mode = 'compare'
 if mode == 'compare':
     print('\nRunning comparision operation\n')
 
-    duplicate_dir = '/Users/mcdonaldfamily/Documents/music to delete copy'
-    dir_untouched_original = '/Users/mcdonaldfamily/Documents/music to delete'
+    duplicate_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2019/12 December latest'
+    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2019/12 December'
 
     move_files = True
     comp = foc.Comparator(move_files)
