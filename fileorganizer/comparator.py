@@ -4,6 +4,7 @@ import filecmp
 from datetime import datetime
 from pathlib import Path
 from collections import namedtuple
+import fileorganizer.utils as utils
 
 
 class Dircmp(filecmp.dircmp):
@@ -18,6 +19,7 @@ class Dircmp(filecmp.dircmp):
         """
 
         # TODO Compare files of multiple similar file extensions
+        # TODO Compare files of different file paths but same file
         # Possibly copy to a temp directory as a new name and then compare with that file instead?
         fcomp = filecmp.cmpfiles(self.left, self.right, self.common_files, shallow=False)
         self.same_files, self.diff_files, self.funny_files = fcomp
@@ -35,6 +37,7 @@ class Comparator:
         # alert of diff files found in these directories
         for name in dcmp.diff_files:
             print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, dcmp.left, dcmp.right))
+
 
         for name in dcmp.left_only:
             #print("\t{}".format(name))
@@ -77,8 +80,17 @@ class Comparator:
             print('Match:{}'.format(match))
             print('Mismatch:{}'.format(mismatch))
             print('Errors:{}'.format(errors))
-        
+
+        if not os.path.isdir(dir1):
+            print('Non-existent directory: ', dir1)
+            return
+
+        if not os.path.isdir(dir2):
+            print('Non-existent directory: ', dir2)
+            return
+
         dcmp = Dircmp(dir1, dir2)
+        if not dcmp: return
         self.parse_comparison(dcmp)
 
         # get current time for duplicates folder name
@@ -106,8 +118,8 @@ class Comparator:
 
         if self.left_only_found:
             print("Unique files in dir 1: {}\n".format(dir1))
-            for filepath in self.left_only_found:
-                print("\t{}".format(filepath))
+            #for filepath in self.left_only_found:
+                #print("\t{}".format(filepath))
 
         # Do we need to display all of these files? TODO: Make a flag for this
         if False and self.right_only_found:
@@ -149,3 +161,21 @@ class Comparator:
         #for sub_dcmp in dcmp.subdirs.values():
         #    self.move_duplicate_files(sub_dcmp, compare_info)
 
+
+def compare_legacy_to_latest(latest_dir, month_str):
+
+    # for each latest directory, run automated comparison
+    for m in month_str:
+        print('\nRunning comparision operation\n')
+
+        duplicate_dir = str(Path(latest_dir, m + ' latest'))
+        dir_untouched_original = duplicate_dir.replace(' latest', '')
+
+        # First compare as-is to capture all Live Photo movie file comparisons
+        move_files = True
+        comp = Comparator(move_files)
+        comp.compare_folders(duplicate_dir, dir_untouched_original)
+
+        # modify extensions to legacy Photo export and compare again
+        utils.oldPhotosExtensions(duplicate_dir)
+        comp.compare_folders(duplicate_dir, dir_untouched_original)

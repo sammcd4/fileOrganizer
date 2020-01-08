@@ -1,6 +1,5 @@
 # Change extensions to all files in a given folder
-import os, sys
-
+import fileorganizer.utils as utils
 
 def modify_exts(directory):
 
@@ -13,31 +12,10 @@ def modify_exts(directory):
         '.AAE': '.aae'
     }
 
-    if False:
-        extensions = {
-            '.MOV': '.mov'
-        }
-
-
-    # only renames on one folder level
-    for filename in os.listdir(directory):
-        filepath = os.path.join(directory,filename)
-        if not os.path.isfile(filepath): continue
-        oldbase = os.path.splitext(filename)
-
-        # rename file for each extension pair
-        for old_ext in extensions:
-            convert_to_lower = True
-            if convert_to_lower:
-                if not old_ext in filepath: continue
-                new_path = filepath.replace(old_ext, extensions[old_ext])
-            else:
-                if not extensions[old_ext] in filepath: continue
-                new_path = filepath.replace(extensions[old_ext], old_ext)
-            output = os.rename(filepath, new_path)
-            print('Rename file:\n\t{}\n\t{}'.format(filepath, new_path))
-
+    utils.modifyextensions(directory, extensions, True)
+    #utils.oldPhotosExtensions(directory)
+    #utils.movExtensions(directory)
 
 if __name__ == '__main__':
-    directory = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2019/11_12 November'
+    directory = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/Screenshots/Workout'
     modify_exts(directory)
