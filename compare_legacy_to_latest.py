@@ -1,6 +1,6 @@
 import fileorganizer.comparator as foc
 
-base_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2017'
+base_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2019'
 
 mode = 'multiple'
 if mode == 'single':
