@@ -5,8 +5,8 @@ mode = 'compare'
 
 if mode == 'compare':
 
-    duplicate_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/01_20 January'
-    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/01 January'
+    duplicate_dir = '/Users/sammcdonald/Pictures/Exported Photo Library/2020/03 March more'
+    dir_untouched_original = '/Users/sammcdonald/Pictures/Exported Photo Library/2020/03 March'
 
     move_files = True
     foc.compare(duplicate_dir, dir_untouched_original, move_files)
