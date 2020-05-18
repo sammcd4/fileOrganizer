@@ -32,22 +32,22 @@ class Comparator:
         self.duplicates_found = False
         self.left_only_found = []
         self.right_only_found = []
+        self.dcmp = []
 
-    def parse_comparison(self, dcmp):
+    def parse_comparison(self):
         # alert of diff files found in these directories
-        for name in dcmp.diff_files:
-            print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, dcmp.left, dcmp.right))
+        for name in self.dcmp.diff_files:
+            print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, self.dcmp.left, self.dcmp.right))
 
-
-        for name in dcmp.left_only:
+        for name in self.dcmp.left_only:
             #print("\t{}".format(name))
-            self.left_only_found.append(Path(dcmp.left, name))
+            self.left_only_found.append(Path(self.dcmp.left, name))
 
-        for name in dcmp.right_only:
+        for name in self.dcmp.right_only:
             #print("\t{}".format(name))
-            self.right_only_found.append(Path(dcmp.right, name))
+            self.right_only_found.append(Path(self.dcmp.right, name))
 
-        for sub_dcmp in dcmp.subdirs.values():
+        for sub_dcmp in self.dcmp.subdirs.values():
             self.parse_comparison(sub_dcmp)
 
     def compare_folders(self, dir1, dir2):
@@ -57,11 +57,11 @@ class Comparator:
                 print('dir1 and dir2 are empty')
             else:
                 print('dir1 is empty')
-            return
+            return None
 
         if dir2 == '':
             print('dir2 is empty')
-            return
+            return None
 
         if False:
             # Determine the items that exist in both directories
@@ -83,15 +83,15 @@ class Comparator:
 
         if not os.path.isdir(dir1):
             print('Non-existent directory: ', dir1)
-            return
+            return False
 
         if not os.path.isdir(dir2):
             print('Non-existent directory: ', dir2)
-            return
+            return False
 
-        dcmp = Dircmp(dir1, dir2)
-        if not dcmp: return
-        self.parse_comparison(dcmp)
+        self.dcmp = Dircmp(dir1, dir2)
+        if not self.dcmp: return False
+        self.parse_comparison()
 
         # get current time for duplicates folder name
         obj = datetime.now()
@@ -109,12 +109,12 @@ class Comparator:
         CompareInfo = namedtuple('CompareInfo', 'dir1, dir2, timestamp, move_dir')
         compareInfo = CompareInfo(dir1, dir2, timestamp_str, comparison_dir)
 
-        if dcmp.same_files:
+        if self.dcmp.same_files:
             self.duplicates_found = True
         else:
-            print('\nNo duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}\n'.format(dcmp.left, dcmp.right))
+            print('\nNo duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}\n'.format(self.dcmp.left, self.dcmp.right))
 
-        self.move_duplicate_files(dcmp, compareInfo)
+        self.move_duplicate_files(self.dcmp, compareInfo)
 
         if self.left_only_found:
             print("Unique files in dir 1: {}\n".format(dir1))
@@ -126,6 +126,8 @@ class Comparator:
             print("Unique files in dir 2: {}\n".format(dir1))
             for filepath in self.right_only_found:
                 print("\t{}".format(filepath))
+
+        return True
 
     def move_duplicate_files(self, dcmp, compare_info):
 
