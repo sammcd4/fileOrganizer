@@ -27,40 +27,46 @@ class Dircmp(filecmp.dircmp):
 
 class Comparator:
 
-    def __init__(self, move_duplicates=True):
+    def __init__(self, move_duplicates=True, print_output=True):
         self.move_duplicates = move_duplicates
         self.duplicates_found = False
         self.left_only_found = []
         self.right_only_found = []
         self.dcmp = []
+        self.print_output = print_output
 
     def parse_comparison(self):
         # alert of diff files found in these directories
         for name in self.dcmp.diff_files:
-            print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, self.dcmp.left, self.dcmp.right))
+            self.print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, self.dcmp.left, self.dcmp.right))
 
         for name in self.dcmp.left_only:
-            #print("\t{}".format(name))
+            #self.print("\t{}".format(name))
             self.left_only_found.append(Path(self.dcmp.left, name))
 
         for name in self.dcmp.right_only:
-            #print("\t{}".format(name))
+            #self.print("\t{}".format(name))
             self.right_only_found.append(Path(self.dcmp.right, name))
 
-        for sub_dcmp in self.dcmp.subdirs.values():
-            self.parse_comparison(sub_dcmp)
+        # TODO: figure out what I was doing here recursively
+        #for sub_dcmp in self.dcmp.subdirs.values():
+        #    self.parse_comparison(sub_dcmp)
+
+    def print(self, *args):
+        if self.print_output:
+            print(*args)
 
     def compare_folders(self, dir1, dir2):
 
         if dir1 == '':
             if dir2 == '':
-                print('dir1 and dir2 are empty')
+                self.print('dir1 and dir2 are empty')
             else:
-                print('dir1 is empty')
+                self.print('dir1 is empty')
             return None
 
         if dir2 == '':
-            print('dir2 is empty')
+            self.print('dir2 is empty')
             return None
 
         if False:
@@ -72,21 +78,21 @@ class Comparator:
                             for f in common
                             if os.path.isfile(os.path.join(dir1, f))
                             ]
-            print('Common files:{}'.format(common_files))
+            self.print('Common files:{}'.format(common_files))
 
             # Compare the directories
             match, mismatch, errors = filecmp.cmpfiles(dir1, dir2, common_files, shallow=False)
 
-            print('Match:{}'.format(match))
-            print('Mismatch:{}'.format(mismatch))
-            print('Errors:{}'.format(errors))
+            self.print('Match:{}'.format(match))
+            self.print('Mismatch:{}'.format(mismatch))
+            self.print('Errors:{}'.format(errors))
 
         if not os.path.isdir(dir1):
-            print('Non-existent directory: ', dir1)
+            self.print('Non-existent directory: ', dir1)
             return False
 
         if not os.path.isdir(dir2):
-            print('Non-existent directory: ', dir2)
+            self.print('Non-existent directory: ', dir2)
             return False
 
         self.dcmp = Dircmp(dir1, dir2)
@@ -96,7 +102,7 @@ class Comparator:
         # get current time for duplicates folder name
         obj = datetime.now()
         timestamp_str = obj.strftime("%d-%b-%Y-%H-%M-%S")
-        print('Current Timestamp : ', timestamp_str)
+        self.print('Current Timestamp : ', timestamp_str)
         duplicate_folder = 'duplicates_' + timestamp_str
 
         # construct the comparisons folder to dump duplicate files
@@ -112,20 +118,20 @@ class Comparator:
         if self.dcmp.same_files:
             self.duplicates_found = True
         else:
-            print('\nNo duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}\n'.format(self.dcmp.left, self.dcmp.right))
+            self.print('\nNo duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}\n'.format(self.dcmp.left, self.dcmp.right))
 
         self.move_duplicate_files(self.dcmp, compareInfo)
 
         if self.left_only_found:
-            print("Unique files in dir 1: {}\n".format(dir1))
+            self.print("Unique files in dir 1: {}\n".format(dir1))
             #for filepath in self.left_only_found:
                 #print("\t{}".format(filepath))
 
         # Do we need to display all of these files? TODO: Make a flag for this
         if False and self.right_only_found:
-            print("Unique files in dir 2: {}\n".format(dir1))
+            self.print("Unique files in dir 2: {}\n".format(dir1))
             for filepath in self.right_only_found:
-                print("\t{}".format(filepath))
+                self.print("\t{}".format(filepath))
 
         return True
 
@@ -133,7 +139,7 @@ class Comparator:
 
         # TODO name could be different and still be a duplicate - how to manage this?
         for name in dcmp.same_files:
-            print("same_file found: {}\n\tsrc {}\n\tdup {}".format(name, Path(dcmp.left, name), Path(dcmp.right, name)))
+            self.print("same_file found: {}\n\tsrc {}\n\tdup {}".format(name, Path(dcmp.left, name), Path(dcmp.right, name)))
 
             if self.move_duplicates:
                 right_relative = Path(dcmp.right).relative_to(compare_info.dir2)
@@ -141,7 +147,7 @@ class Comparator:
                 if not os.path.isdir(md):
                     os.makedirs(md)
                 shutil.move(Path(dcmp.left, name), Path(md, name))
-                print("\tmvd {}".format(Path(md, name)))
+                self.print("\tmvd {}".format(Path(md, name)))
 
                 # TODO apparently not all subdirectories are being removed
                 # remove the directory if all files have been moved
@@ -154,7 +160,7 @@ class Comparator:
     def move_duplicate_files2(self, compare_info):
 
         for name in compare_info.match:
-            print("same_file {} found in {} and {}".format(name, compare_info.dir1, compare_info.dir2))
+            self.print("same_file {} found in {} and {}".format(name, compare_info.dir1, compare_info.dir2))
             md = compare_info.move_dir
             if not os.path.isdir(md):
                 os.mkdir(md)
@@ -168,7 +174,7 @@ def compare_legacy_to_latest(latest_dir, month_str):
 
     # for each latest directory, run automated comparison
     for m in month_str:
-        print('\nRunning comparision operation\n')
+        self.print('\nRunning comparision operation\n')
 
         duplicate_dir = str(Path(latest_dir, m + ' latest'))
         dir_untouched_original = duplicate_dir.replace(' latest', '')
