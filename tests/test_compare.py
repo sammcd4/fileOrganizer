@@ -76,8 +76,8 @@ class MyTestCase(unittest.TestCase):
         dcmp = comp.dcmp
 
         # there should be no common files (files of same name) and no same files (identical files)
-        self.assertEqual(dcmp.common_files, dcmp.same_files)
-        self.assertFalse(dcmp.same_files)
+        self.assertEmpty(dcmp.common_files)
+        self.assertEmpty(dcmp.same_files)
 
     def test_funny_files(self):
         # TODO: Write this with some given funny files
@@ -87,12 +87,33 @@ class MyTestCase(unittest.TestCase):
         # TODO: Write this with filenames that are clearly different
         self.assertEqual(True, True)
 
+    def test_diff_same_name(self):
+        # Different files (based on content) compare not equal
+        comp = self.compare_different_dirs('samename1', 'samename2')
+        dcmp = comp.dcmp
+
+        # there should be common files (files of same name) but no same files (identical files)
+        self.assertTrue(dcmp.common_files)
+        self.assertEmpty(dcmp.same_files)
+
+    def test_diff_diff_name(self):
+        # should be covered by test_all_diff
+        pass
+
+    def test_diff_same_ext(self):
+        # should be covered by test_diff_same_name
+        pass
+
+    def test_diff_diff_ext(self):
+        pass
+
     def test_diff_same_filenames(self):
 
         # Different files with same filenames are actually different
         comp = self.compare_different_dirs('samename1', 'samename2')
         dcmp = comp.dcmp
 
+        # there should be
         self.assertEqual(dcmp.common_files, dcmp.diff_files)
         self.assertFalse(dcmp.same_files)
 
