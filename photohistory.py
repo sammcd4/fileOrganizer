@@ -80,6 +80,9 @@ def get_types_from_folder(directory):
     num_raw_photos = 0
     size_raw_photos = 0
 
+    num_other = 0
+    size_other = 0
+
     # find all file types (count and size)
     files = Path(directory).rglob('**/*.*')
     for file in files:
@@ -123,6 +126,10 @@ def get_types_from_folder(directory):
             # Raw photos
             num_raw_photos += 1  # increment
             size_raw_photos += get_file_size(file, 'MB')
+        else:
+            # Other files
+            num_other += 1 # increment
+            size_other += get_file_size(file, 'MB')
 
 
     # calculate photo count and size (accounting for LivePhotos)
@@ -158,6 +165,11 @@ def get_types_from_folder(directory):
     types_dict['raw'] = {}
     types_dict['raw']['count'] = num_raw_photos
     types_dict['raw']['size'] = size_raw_photos
+
+    # other files
+    types_dict['other'] = {}
+    types_dict['other']['count'] = num_other
+    types_dict['other']['size'] = size_other
 
     # verify that all files have been counted and sized
     file_counter = 0
