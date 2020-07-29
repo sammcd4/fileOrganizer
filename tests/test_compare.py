@@ -2,7 +2,7 @@ import unittest
 from fileorganizer.comparator import Comparator
 
 
-class MyTestCase(unittest.TestCase):
+class CompareTests(unittest.TestCase):
 
     move_duplicates = False
     print_output = False

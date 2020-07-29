@@ -3,6 +3,8 @@ import glob
 from pathlib import Path
 
 # Methods to extract count and size of photos/videos for each month
+# TODO: make photohistory class to encapsulate methods and printing options
+
 
 def get_ext_from_folder(directory):
     # returns a dictionary of key-value pairs of file extension and number of files
@@ -42,6 +44,21 @@ def get_num_files(directory, ext):
     return len(glob.glob(directory + '/**/*' + ext, recursive=True))
 
 
+def init_types(types):
+    type_dict = {}
+    for a_type in types:
+        type_dict[a_type] = {}
+        type_dict[a_type]['count'] = 0
+        type_dict[a_type]['size'] = 0
+
+    return type_dict
+
+
+def update_type(types_dict, a_type, file):
+    types_dict[a_type]['count'] += 1
+    types_dict[a_type]['size'] += get_file_size(file, 'MB')
+
+
 def get_types_from_folder(directory):
 
     types_dict = {}
@@ -62,26 +79,12 @@ def get_types_from_folder(directory):
     file_count = get_num_files(directory, '.*')
 
     # initialize count and size
-    num_photos = 0
-    size_photos = 0
-
-    num_live_photos = 0
-    size_live_photos = 0
-
-    num_live_photos_mov = 0
-    size_live_photos_mov = 0
-
-    num_videos = 0
-    size_videos = 0
-
-    num_screenshots = 0
-    size_screenshots = 0
-
-    num_raw_photos = 0
-    size_raw_photos = 0
-
-    num_other = 0
-    size_other = 0
+    types_list = ['livephoto', 'livephotovideo',
+                  'video', 'photo',
+                  'screenshot', 'raw',
+                  'other']
+    types_dict = init_types(types_list)
+    #print(types_dict)
 
     # find all file types (count and size)
     files = Path(directory).rglob('**/*.*')
@@ -99,77 +102,34 @@ def get_types_from_folder(directory):
 
         if any(ext in file_str for ext in live_photo_ext):
             # Live Photo
-            num_live_photos += 1
-            size_live_photos += get_file_size(file, 'MB')
+            update_type(types_dict, 'livephoto', file)
 
         elif any(ext in file_str for ext in live_photo_mov_ext):
             # Live Photo videos
-            num_live_photos_mov += 1
-            size_live_photos_mov += get_file_size(file, 'MB')
+            update_type(types_dict, 'livephotovideo', file)
 
         elif any(ext in file_str for ext in photo_exts):
             # Photo
-            num_photos += 1  # increment
-            size_photos += get_file_size(file, 'MB')
+            update_type(types_dict, 'photo', file)
 
         elif any(ext in file_str for ext in video_exts):
             # Video
-            num_videos += 1  # increment
-            size_videos += get_file_size(file, 'MB')
+            update_type(types_dict, 'video', file)
 
         elif any(ext in file_str for ext in screenshot_exts):
             # Screenshots
-            num_screenshots += 1  # increment
-            size_screenshots += get_file_size(file, 'MB')
+            update_type(types_dict, 'screenshot', file)
 
         elif any(ext in file_str for ext in raw_exts):
             # Raw photos
-            num_raw_photos += 1  # increment
-            size_raw_photos += get_file_size(file, 'MB')
+            update_type(types_dict, 'raw', file)
+
         else:
             # Other files
-            num_other += 1 # increment
-            size_other += get_file_size(file, 'MB')
+            update_type(types_dict, 'other', file)
 
-
-    # calculate photo count and size (accounting for LivePhotos)
-    types_dict['photo'] = {}
-    #print('num_photos = {}'.format(num_photos))
-    #print('num_live_photos = {}'.format(num_live_photos))
-    #print('num_photos_glob = {}'.format(num_photos_glob))
-    assert num_photos + num_live_photos == num_photos_glob
-    types_dict['photo']['count'] = num_photos
-    types_dict['photo']['size'] = size_photos
-
-    # live photos
-    types_dict['livephoto'] = {}
-    types_dict['livephoto']['count'] = num_live_photos
-    types_dict['livephoto']['size'] = size_live_photos
-
-    # live photo videos
-    types_dict['livephotovideo'] = {}
-    types_dict['livephotovideo']['count'] = num_live_photos_mov
-    types_dict['livephotovideo']['size'] = size_live_photos_mov
-
-    # videos
-    types_dict['video'] = {}
-    types_dict['video']['count'] = num_videos
-    types_dict['video']['size'] = size_videos
-
-    # screenshots
-    types_dict['screenshot'] = {}
-    types_dict['screenshot']['count'] = num_screenshots
-    types_dict['screenshot']['size'] = size_screenshots
-
-    # raw photos
-    types_dict['raw'] = {}
-    types_dict['raw']['count'] = num_raw_photos
-    types_dict['raw']['size'] = size_raw_photos
-
-    # other files
-    types_dict['other'] = {}
-    types_dict['other']['count'] = num_other
-    types_dict['other']['size'] = size_other
+    # verify count of all photos, otherwise exit
+    assert types_dict['photo']['count'] + types_dict['livephoto']['count'] == num_photos_glob
 
     # verify that all files have been counted and sized
     file_counter = 0
