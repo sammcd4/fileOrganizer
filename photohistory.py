@@ -1,6 +1,10 @@
 import os
 import glob
 from pathlib import Path
+import xlwt
+from xlwt import Workbook
+from PIL import Image
+from PIL.ExifTags import TAGS
 
 # Methods to extract count and size of photos/videos for each month
 # TODO: make photohistory class to encapsulate methods and printing options
@@ -79,7 +83,7 @@ def get_types_from_folder(directory):
     file_count = get_num_files(directory, '.*')
 
     # initialize count and size
-    types_list = ['livephoto', 'livephotovideo',
+    types_list = ['applephoto', 'livephoto', 'livephotovideo',
                   'video', 'photo',
                   'screenshot', 'raw',
                   'other']
@@ -110,7 +114,34 @@ def get_types_from_folder(directory):
 
         elif any(ext in file_str for ext in photo_exts):
             # Photo
-            update_type(types_dict, 'photo', file)
+
+            # determine if the source was an Apple device
+            is_apple_photo = False
+            # read the image data using PIL
+            image = Image.open(file)
+            # extract EXIF data
+            exifdata = image.getexif()
+            # iterating over all EXIF data fields
+            for tag_id in exifdata:
+                # get the tag name, instead of human unreadable tag id
+                tag = TAGS.get(tag_id, tag_id)
+
+                if tag == 'Make':
+                    data = exifdata.get(tag_id)
+                    # decode bytes
+                    if isinstance(data, bytes):
+                        data = data.decode()
+                    if data == 'Apple':
+                        is_apple_photo = True
+                        break
+
+            if is_apple_photo:
+                photo_type = 'applephoto'
+                print('Found photo taken from Apple device')
+            else:
+                photo_type = 'photo'
+
+            update_type(types_dict, photo_type, file)
 
         elif any(ext in file_str for ext in video_exts):
             # Video
@@ -129,7 +160,7 @@ def get_types_from_folder(directory):
             update_type(types_dict, 'other', file)
 
     # verify count of all photos, otherwise exit
-    assert types_dict['photo']['count'] + types_dict['livephoto']['count'] == num_photos_glob
+    assert types_dict['applephoto']['count'] + types_dict['photo']['count'] + types_dict['livephoto']['count'] == num_photos_glob
 
     # verify that all files have been counted and sized
     file_counter = 0
@@ -141,6 +172,29 @@ def get_types_from_folder(directory):
     return types_dict
 
 
+def write_excel(types_dict):
+
+    # Workbook is created
+    wb = Workbook()
+
+    # add_sheet is used to create sheet.
+    sheet1 = wb.add_sheet('Sheet 1')
+
+    iter = 0
+    for a_type, value in types_dict.items():
+        sheet1.write(0, iter, a_type + '_count')
+        sheet1.write(1, iter, types_dict[a_type]['count'])
+        iter += 1
+        sheet1.write(0, iter, a_type + '_size')
+        sheet1.write(1, iter, types_dict[a_type]['size'])
+        iter += 1
+
+    wb.save('types_data.xls')
+
+
 if __name__ == '__main__':
     directory1 = '/Users/sammcdonald/Documents/photos'
-    print(get_types_from_folder(directory1))
+    types_dict = get_types_from_folder(directory1)
+    print(types_dict)
+
+    write_excel(types_dict)
