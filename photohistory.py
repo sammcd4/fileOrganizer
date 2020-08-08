@@ -197,4 +197,12 @@ if __name__ == '__main__':
     types_dict = get_types_from_folder(directory1)
     print(types_dict)
 
+    # TODO: Read from excel file and choose to add to values that already exist there
+    # TODO: Have one excel to read from and a different one to write to, to preserve data
+    # TODO: Description column just with the directory
+    # TODO: Way to automate all the folders, since this only works for one right now.
+    # TODO: Come up with format of excel file for several folders, probably just rows for each unique subdirectory
+    # TODO: Incorporate some logic based on the date. Need a way to only log ones for a particular month/year
+    # TODO: Write tests for photohistory, including date range filtering
+    # TODO: Have a sheet for each month/year or something?
     write_excel(types_dict)
