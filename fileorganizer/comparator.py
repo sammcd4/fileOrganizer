@@ -66,19 +66,26 @@ class Comparator:
             self.compare_folders_impl(dir1, dir2)
 
             # Find all extensions in dir1 and dir2
-            dir1_exts = utils.get_extensions(dir1)
-            dir2_exts = utils.get_extensions(dir2)
+            ext_in_dir1 = utils.get_extensions(dir1)
+            ext_in_dir2 = utils.get_extensions(dir2)
 
-            for dir2_ext in dir2_exts:
-                # check if dir1_exts has any convertible extensions to this extension
-                pass
+            for ext_dir2 in ext_in_dir2:
 
-            # Check for any files in dir1 that can be converted to dir2 extensions
-            # For each of the convertible extensions from dir1 to dir2
-                # Track the dir1 files that I'm about to compare with
-                # Copy those files to a temporary directory
-                # Compare dir1_JPG_to_jpeg with dir2 and save same files
-                #
+                # iterate over all convertible and see if ext_in_dir1 has one
+                for convertible_ext in utils.get_convertible_extensions(ext_dir2):
+
+                    if convertible_ext in ext_in_dir1:
+                        # files of this extension need to be converted and placed in temp directory to compare with dir2
+
+                        # Identify all files with this extension in dir1
+
+
+                # Check for any files in dir1 that can be converted to dir2 extensions
+                # For each of the convertible extensions from dir1 to dir2
+                    # Track the dir1 files that I'm about to compare with
+                    # Copy those files to a temporary directory
+                    # Compare dir1_JPG_to_jpeg with dir2 and save same files
+                    #
         else:
             return self.compare_folders_impl(dir1, dir2)
 
