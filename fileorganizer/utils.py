@@ -2,14 +2,14 @@ import os
 import glob
 
 
-def get_num_files(directory, ext):
+def get_num_files(directory, ext, recursive=True):
     # use glob.glob to search for files with the specified extension
-    return len(get_files_with_ext(directory, ext))
+    return len(get_files_with_ext(directory, ext, recursive))
 
 
-def get_files_with_ext(directory, ext):
+def get_files_with_ext(directory, ext, recursive=True):
     # use glob.glob to search for files with the specified extension
-    return glob.glob(directory + '/**/*' + ext, recursive=True)
+    return glob.glob(directory + '/**/*' + ext, recursive=recursive)
 
 
 def get_extensions(directory):

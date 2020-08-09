@@ -35,6 +35,8 @@ class Comparator:
         self.dcmp = []
         self.print_output = print_output
         self.ignore_extensions = False
+        self.comparison_dir = ''
+        self.duplicate_folder = ''
 
     def parse_comparison(self):
         # alert of diff files found in these directories
@@ -78,6 +80,18 @@ class Comparator:
                         # files of this extension need to be converted and placed in temp directory to compare with dir2
 
                         # Identify all files with this extension in dir1
+                        orig_files = utils.get_files_with_ext(dir1, convertible_ext)
+
+                        # Copy all those convertible files to a temp directory
+                        tmp_dir_name = 'dir1_' + convertible_ext + '_to_' + ext_dir2
+                        # self.comparison_dir should be assigned because compare_folders(dir1, dir2) has been called
+                        tmp_dir1 = Path(self.comparison_dir, tmp_dir_name)
+                        os.mkdir(tmp_dir1)
+
+                        for orig_file in orig_files:
+                            full_file_name = Path(src, file_name)
+                            if os.path.isfile(full_file_name):
+                                shutil.copy(full_file_name, dest)
 
 
                 # Check for any files in dir1 that can be converted to dir2 extensions
@@ -137,11 +151,14 @@ class Comparator:
         timestamp_str = obj.strftime("%d-%b-%Y-%H-%M-%S")
         self.print('Current Timestamp : ', timestamp_str)
         duplicate_folder = 'duplicates_' + timestamp_str
+        self.duplicate_folder = duplicate_folder
 
         # construct the comparisons folder to dump duplicate files
         src_dir = Path(dir1)
         src_dir_parent = src_dir.parent
         comparison_dir = Path(src_dir_parent, 'comparisons', duplicate_folder)
+        self.comparison_dir = comparison_dir
+        # TODO: Call this something other than comparison dir when it's really the duplicates dir
         if not os.path.isdir(Path(src_dir_parent, 'comparisons')):
             os.makedirs(Path(src_dir_parent, 'comparisons'))
 

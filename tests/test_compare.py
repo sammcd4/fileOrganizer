@@ -1,6 +1,7 @@
 import unittest
 from fileorganizer.comparator import Comparator
-
+import os
+import shutil
 
 class CompareTests(unittest.TestCase):
 
@@ -116,6 +117,37 @@ class CompareTests(unittest.TestCase):
         # there should be
         self.assertEqual(dcmp.common_files, dcmp.diff_files)
         self.assertFalse(dcmp.same_files)
+
+    def test_move_file(self):
+        # actually move an identical test file
+        comp = Comparator(True, self.print_output)
+        dir1 = self.identical_dir + 'move1'
+        dir2 = self.identical_dir + 'dir2'
+        self.assertTrue(comp.compare_folders(dir1, dir2))
+
+        # check file exists in comparisons folder
+        # TODO: iterate over all files in move1 instead of hard coding here
+        filepath = os.path.join(comp.comparison_dir, 'IMG_0900.JPG')
+        self.assertTrue(os.path.isfile(filepath), 'Expected file to be at {}'.format(filepath))
+
+        # Ensure that empty move1 folder was deleted as expected
+        self.assertFalse(os.path.isdir(dir1), 'Expected {} to be non-existent'.format(dir1))
+
+        # move the file back to where it came from in move1
+        if not os.path.isdir(dir1):
+            os.mkdir(dir1)
+        move1_filepath = os.path.join(dir1, 'IMG_0900.JPG')
+        self.assertFalse(os.path.isfile(move1_filepath))
+        shutil.move(filepath, move1_filepath)
+        self.assertTrue(os.path.isfile(move1_filepath))
+
+        # No logic so far to remove empty duplicates folder, but in this case it will be empty and need removal
+        if os.path.isdir(comp.comparison_dir):
+            os.rmdir(comp.comparison_dir)
+
+    def test_maintain_file_path(self):
+        # Ensure that the original file path is preserved when moving the identical file after comparison
+        self.assertTrue(False)
 
 
 if __name__ == '__main__':
