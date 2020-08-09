@@ -1,6 +1,50 @@
 import os
 
 
+def get_extensions(directory):
+    # return a list of all file extensions in this directory
+    exts = []
+    return exts
+
+
+def get_convertible_extensions(extension):
+    # given a file extension, get a list of all similar extensions
+    if extension == '.JPG':
+        return ['.jpg', '.jpeg', '.JPEG']
+    elif extension == '.jpg':
+        return ['.JPG', '.jpeg', '.JPEG']
+    elif extension == '.jpeg':
+        return ['.JPG', '.jpg', '.JPEG']
+    elif extension == '.JPEG':
+        return ['.jpg', '.JPG', '.jpeg']
+    elif extension == '.mov':
+        return ['.MOV']
+    elif extension == '.MOV':
+        return ['.mov']
+    elif extension == '.heic':
+        return ['.HEIC']
+    elif extension == '.HEIC':
+        return ['.heic']
+    elif extension == '.MPG':
+        return ['.mpg', '.mpeg', '.MPEG']
+    elif extension == '.mpg':
+        return ['.MPG', '.mpeg', '.MPEG']
+    elif extension == '.mpeg':
+        return ['.mpg', '.MPG', '.MPEG']
+    elif extension == '.MPEG':
+        return ['.MPG', '.mpg', '.mpeg']
+    elif extension == '.MP4':
+        return ['.mp4']
+    elif extension == '.mp4':
+        return ['.MP4']
+    elif extension == '.PNG':
+        return ['.png']
+    elif extension == '.png':
+        return ['.PNG']
+    else:
+        return []
+
+
 def modifyextensions(directory, extensions, reverse_conversion=False):
 
     if not os.path.isdir(directory):

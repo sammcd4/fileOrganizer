@@ -34,6 +34,7 @@ class Comparator:
         self.right_only_found = []
         self.dcmp = []
         self.print_output = print_output
+        self.ignore_extensions = False
 
     def parse_comparison(self):
         # alert of diff files found in these directories
@@ -56,7 +57,32 @@ class Comparator:
         if self.print_output:
             print(*args)
 
+    # dir1 contains files to be moved to comparisons folder
     def compare_folders(self, dir1, dir2):
+        # TODO: Use *args here?
+
+        if self.ignore_extensions:
+            # compare files with unchanged extensions for a baseline
+            self.compare_folders_impl(dir1, dir2)
+
+            # Find all extensions in dir1 and dir2
+            dir1_exts = utils.get_extensions(dir1)
+            dir2_exts = utils.get_extensions(dir2)
+
+            for dir2_ext in dir2_exts:
+                # check if dir1_exts has any convertible extensions to this extension
+                pass
+
+            # Check for any files in dir1 that can be converted to dir2 extensions
+            # For each of the convertible extensions from dir1 to dir2
+                # Track the dir1 files that I'm about to compare with
+                # Copy those files to a temporary directory
+                # Compare dir1_JPG_to_jpeg with dir2 and save same files
+                #
+        else:
+            return self.compare_folders_impl(dir1, dir2)
+
+    def compare_folders_impl(self, dir1, dir2):
 
         if dir1 == '':
             if dir2 == '':
@@ -143,11 +169,11 @@ class Comparator:
 
             if self.move_duplicates:
                 right_relative = Path(dcmp.right).relative_to(compare_info.dir2)
-                md = Path(compare_info.move_dir, str(right_relative))
-                if not os.path.isdir(md):
-                    os.makedirs(md)
-                shutil.move(Path(dcmp.left, name), Path(md, name))
-                self.print("\tmvd {}".format(Path(md, name)))
+                move_dir = Path(compare_info.move_dir, str(right_relative))
+                if not os.path.isdir(move_dir):
+                    os.makedirs(move_dir)
+                shutil.move(Path(dcmp.left, name), Path(move_dir, name))
+                self.print("\tmvd {}".format(Path(move_dir, name)))
 
                 # TODO apparently not all subdirectories are being removed
                 # remove the directory if all files have been moved
