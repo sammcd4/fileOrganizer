@@ -89,9 +89,15 @@ class Comparator:
                         os.mkdir(tmp_dir1)
 
                         for orig_file in orig_files:
-                            full_file_name = Path(src, file_name)
-                            if os.path.isfile(full_file_name):
-                                shutil.copy(full_file_name, dest)
+                            orig_file_name = os.path.basename(orig_file)
+                            converted_file_name = orig_file_name.replace(convertible_ext, ext_dir2)
+                            if os.path.isfile(orig_file):
+                                shutil.copy(orig_file, os.path.join(tmp_dir1, converted_file_name))
+
+                        # Now that all relevant files are in the tmp directory, make the comparison
+                        self.compare_folders_impl(tmp_dir1, dir2)
+
+                        # Move files from dir1 that come back as dcmp.samefiles from this comparison
 
 
                 # Check for any files in dir1 that can be converted to dir2 extensions

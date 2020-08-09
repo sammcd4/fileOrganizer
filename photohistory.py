@@ -8,6 +8,7 @@ from xlutils.copy import copy
 from PIL import Image
 from PIL.ExifTags import TAGS
 import itertools
+import fileorganizer.utils as utils
 
 # Methods to extract count and size of photos/videos for each month
 # TODO: make photohistory class to encapsulate methods and printing options
@@ -47,11 +48,6 @@ def convert_bytes(size, unit=None):
         return size
 
 
-def get_num_files(directory, ext):
-    # use glob.glob to search for files with the specified extension
-    return len(glob.glob(directory + '/**/*' + ext, recursive=True))
-
-
 def init_types(types):
     type_dict = {}
     for a_type in types:
@@ -82,9 +78,10 @@ def get_types_from_folder(directory):
     # find all photos
     num_photos_glob = 0
     for photo_ext in photo_exts:
-        num_photos_glob += get_num_files(directory, photo_ext)
+        num_photos_glob += utils.get_num_files(directory, photo_ext)
 
-    file_count = get_num_files(directory, '.*')
+    file_count = utils.get_num_files(directory, '.*')
+    #print(utils.get_files_with_ext(directory, '.*'))
 
     # initialize count and size
     types_list = ['applephoto', 'livephoto', 'livephotovideo',
@@ -240,11 +237,11 @@ if __name__ == '__main__':
     # TODO: Have a sheet for each month/year or something?
     # TODO: Start with the Exported Photo Library, because month/year is easy by folder
 
-    mode = 'exportedphotolibrary'
+    mode = 'single'
 
     if mode == 'single':
-        #directory1 = '/Users/sammcdonald/Documents/photos'
-        directory1 = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/01 January'
+        directory1 = '/Users/sammcdonald/Documents/photos'
+        #directory1 = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/01 January'
         types_dict = get_types_from_folder(directory1)
         print(types_dict)
 
