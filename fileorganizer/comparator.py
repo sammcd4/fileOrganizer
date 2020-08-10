@@ -35,8 +35,8 @@ class Comparator:
         self.dcmp = []
         self.print_output = print_output
         self.ignore_extensions = False
-        self.comparison_dir = ''
-        self.duplicate_folder = ''
+        self.comparisons_dir = ''
+        self.duplicates_dir = ''
 
     def parse_comparison(self):
         # alert of diff files found in these directories
@@ -84,8 +84,8 @@ class Comparator:
 
                         # Copy all those convertible files to a temp directory
                         tmp_dir_name = 'dir1_' + convertible_ext + '_to_' + ext_dir2
-                        # self.comparison_dir should be assigned because compare_folders(dir1, dir2) has been called
-                        tmp_dir1 = Path(self.comparison_dir, tmp_dir_name)
+                        # self.duplicates_dir should be assigned because compare_folders(dir1, dir2) has been called
+                        tmp_dir1 = Path(self.duplicates_dir, tmp_dir_name)
                         os.mkdir(tmp_dir1)
 
                         for orig_file in orig_files:
@@ -157,19 +157,19 @@ class Comparator:
         timestamp_str = obj.strftime("%d-%b-%Y-%H-%M-%S")
         self.print('Current Timestamp : ', timestamp_str)
         duplicate_folder = 'duplicates_' + timestamp_str
-        self.duplicate_folder = duplicate_folder
 
         # construct the comparisons folder to dump duplicate files
         src_dir = Path(dir1)
         src_dir_parent = src_dir.parent
-        comparison_dir = Path(src_dir_parent, 'comparisons', duplicate_folder)
-        self.comparison_dir = comparison_dir
+        duplicates_dir = Path(src_dir_parent, 'comparisons', duplicate_folder)
+        self.duplicates_dir = duplicates_dir
+        self.comparisons_dir = Path(src_dir_parent, 'comparisons')
         # TODO: Call this something other than comparison dir when it's really the duplicates dir
         if not os.path.isdir(Path(src_dir_parent, 'comparisons')):
             os.makedirs(Path(src_dir_parent, 'comparisons'))
 
         CompareInfo = namedtuple('CompareInfo', 'dir1, dir2, timestamp, move_dir')
-        compareInfo = CompareInfo(dir1, dir2, timestamp_str, comparison_dir)
+        compareInfo = CompareInfo(dir1, dir2, timestamp_str, duplicates_dir)
 
         if self.dcmp.same_files:
             self.duplicates_found = True

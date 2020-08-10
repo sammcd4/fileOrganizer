@@ -127,7 +127,7 @@ class CompareTests(unittest.TestCase):
 
         # check file exists in comparisons folder
         # TODO: iterate over all files in move1 instead of hard coding here
-        filepath = os.path.join(comp.comparison_dir, 'IMG_0900.JPG')
+        filepath = os.path.join(comp.duplicates_dir, 'IMG_0900.JPG')
         self.assertTrue(os.path.isfile(filepath), 'Expected file to be at {}'.format(filepath))
 
         # Ensure that empty move1 folder was deleted as expected
@@ -142,8 +142,8 @@ class CompareTests(unittest.TestCase):
         self.assertTrue(os.path.isfile(move1_filepath))
 
         # No logic so far to remove empty duplicates folder, but in this case it will be empty and need removal
-        if os.path.isdir(comp.comparison_dir):
-            os.rmdir(comp.comparison_dir)
+        if os.path.isdir(comp.duplicates_dir):
+            os.rmdir(comp.duplicates_dir)
 
     def test_maintain_file_path(self):
         # Ensure that the original file path is preserved when moving the identical file after comparison
