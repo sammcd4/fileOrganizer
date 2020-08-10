@@ -39,22 +39,24 @@ class Comparator:
         self.duplicates_dir = ''
         self.reuse_duplicates_dir = False
 
-    def parse_comparison(self):
+    def parse_comparison(self, dcmp):
         # alert of diff files found in these directories
-        for name in self.dcmp.diff_files:
+        for name in dcmp.diff_files:
             self.print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, self.dcmp.left, self.dcmp.right))
 
-        for name in self.dcmp.left_only:
+        # TODO: feature{compare_diff_ext} Only count left only if all comparisons have left only
+        for name in dcmp.left_only:
             #self.print("\t{}".format(name))
             self.left_only_found.append(Path(self.dcmp.left, name))
 
-        for name in self.dcmp.right_only:
+        #  TODO: feature{compare_diff_ext} Only count right only if all comparisons have right only
+        for name in dcmp.right_only:
             #self.print("\t{}".format(name))
             self.right_only_found.append(Path(self.dcmp.right, name))
 
         # TODO: figure out what I was doing here recursively
-        #for sub_dcmp in self.dcmp.subdirs.values():
-        #    self.parse_comparison(sub_dcmp)
+        for sub_dcmp in dcmp.subdirs.values():
+            self.parse_comparison(sub_dcmp)
 
     def print(self, *args):
         if self.print_output:
@@ -85,10 +87,11 @@ class Comparator:
                         orig_files = utils.get_files_with_ext(dir1, convertible_ext)
 
                         # Copy all those convertible files to a temp directory
-                        tmp_dir_name = 'dir1_' + convertible_ext + '_to_' + ext_dir2
+                        tmp_dir_name = 'dir1_' + convertible_ext.replace('.', '') + '_to_' + ext_dir2.replace('.', '')
                         # self.duplicates_dir should be assigned because compare_folders(dir1, dir2) has been called
-                        tmp_dir1 = Path(self.duplicates_dir, tmp_dir_name)
-                        os.mkdir(tmp_dir1)
+                        tmp_dir1 = Path(self.comparisons_dir, tmp_dir_name)
+                        if not os.path.isdir(tmp_dir1):
+                            os.mkdir(tmp_dir1)
 
                         # Convert all files that match this extension, preserving file path
                         for orig_file in orig_files:
@@ -129,6 +132,8 @@ class Comparator:
 
             # Cleanup compare_diff_ext settings
             self.reuse_duplicates_dir = False
+
+            return True
         else:
             return self.compare_folders_impl(dir1, dir2)
 
@@ -173,8 +178,12 @@ class Comparator:
             return False
 
         self.dcmp = Dircmp(dir1, dir2)
-        if not self.dcmp: return False
-        self.parse_comparison()
+        if not self.dcmp:
+            return False
+        self.parse_comparison(self.dcmp)
+
+        src_dir = Path(dir1)
+        src_dir_parent = src_dir.parent
 
         # TODO: feature{compare_diff_ext} replace ignore_extension with something like compare_diff_ext or something
         # only assign new duplicates dir if not wanting to reuse (will reuse in ignore_extension workflow)
@@ -189,13 +198,10 @@ class Comparator:
             # compare operation instead of like 5 or 6.
 
             # construct the comparisons folder to dump duplicate files
-            src_dir = Path(dir1)
-            src_dir_parent = src_dir.parent
             duplicates_dir = Path(src_dir_parent, 'comparisons', duplicate_folder)
             self.duplicates_dir = duplicates_dir
 
         self.comparisons_dir = Path(src_dir_parent, 'comparisons')
-
         if not os.path.isdir(Path(src_dir_parent, 'comparisons')):
             os.makedirs(Path(src_dir_parent, 'comparisons'))
 

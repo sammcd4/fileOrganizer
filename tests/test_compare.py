@@ -9,12 +9,13 @@ class CompareTests(unittest.TestCase):
     print_output = False
     identical_dir = '../files/identical/'
     different_dir = '../files/different/'
+    ignore_extensions = False
 
     def assertEmpty(self, obj):
         self.assertEqual(len(obj), 0, "Object is not empty")
 
     def compare_dirs(self, parent_dir, folder1, folder2):
-        comp = Comparator(self.move_duplicates, self.print_output)
+        comp = Comparator(self.move_duplicates, self.print_output, self.ignore_extensions)
         dir1 = parent_dir + folder1
         dir2 = parent_dir + folder2
         self.assertTrue(comp.compare_folders(dir1, dir2))
@@ -46,18 +47,23 @@ class CompareTests(unittest.TestCase):
         self.assertFalse(dcmp.diff_files)
 
     def test_identical_diffext(self):
+        # Setup
+        self.ignore_extensions = True
 
         # Identical files (but different extensions) compare equal
         comp = self.compare_identical_dirs('diffext1', 'diffext2')
         dcmp = comp.dcmp
 
-        # if identical, no unique file sin either directory
+        # if identical, no unique files in either directory
         self.assertEmpty(comp.left_only_found)
         self.assertEmpty(comp.right_only_found)
 
         # check same number of files in common and same because different extension will make lists unequal
         self.assertEqual(len(dcmp.common_files), len(dcmp.same_files))
         self.assertFalse(dcmp.diff_files)
+
+        # Cleanup
+        self.ignore_extensions = False
 
     def test_identical_diffname(self):
 

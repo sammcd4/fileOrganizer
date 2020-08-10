@@ -15,6 +15,13 @@ def get_files_with_ext(directory, ext, recursive=True):
 def get_extensions(directory):
     # return a list of all file extensions in this directory
     exts = []
+
+    # Iterate over all files in the directory and append any new extensions
+    files = get_files_with_ext(directory, '.*')
+    for file in files:
+        name, ext = os.path.splitext(file)
+        if ext not in exts:
+            exts.append(ext)
     return exts
 
 
