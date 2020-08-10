@@ -37,6 +37,7 @@ class Comparator:
         self.ignore_extensions = ignore_extensions
         self.comparisons_dir = ''
         self.duplicates_dir = ''
+        self.reuse_duplicates_dir = False
 
     def parse_comparison(self):
         # alert of diff files found in these directories
@@ -66,6 +67,7 @@ class Comparator:
         if self.ignore_extensions:
             # compare files with unchanged extensions for a baseline
             self.compare_folders_impl(dir1, dir2)
+            self.reuse_duplicates_dir = True
 
             # Find all extensions in dir1 and dir2
             ext_in_dir1 = utils.get_extensions(dir1)
@@ -88,25 +90,51 @@ class Comparator:
                         tmp_dir1 = Path(self.duplicates_dir, tmp_dir_name)
                         os.mkdir(tmp_dir1)
 
+                        # Convert all files that match this extension, preserving file path
                         for orig_file in orig_files:
+                            relative_file_path = Path(orig_file).relative_to(dir1)
                             orig_file_name = os.path.basename(orig_file)
+                            relative_file_path_parent = str(relative_file_path).replace(orig_file_name, '')
+
+                            # save the same file with a different extension that matches dir2
                             converted_file_name = orig_file_name.replace(convertible_ext, ext_dir2)
                             if os.path.isfile(orig_file):
-                                shutil.copy(orig_file, os.path.join(tmp_dir1, converted_file_name))
+                                shutil.copy(orig_file, os.path.join(tmp_dir1, relative_file_path_parent, converted_file_name))
 
                         # Now that all relevant files are in the tmp directory, make the comparison
                         self.compare_folders_impl(tmp_dir1, dir2)
 
-                        # Move files from dir1 that come back as dcmp.samefiles from this comparison
-                        # TODO: Need to avoid mistakenly moving a file from a subdirectory with the same name
-                        # TODO: Need to track the exact path to a file and only move ones that match same_files and same path
-                        # TODO: Perhaps modify the dcmp.same_files on every subdcmp and pass that to move_duplicates?
+                        # TODO: Copied code from compare_folders_impl because need separately here
+                        if self.dcmp.same_files:
+                            self.duplicates_found = True
+                        else:
+                            # TODO: feature{compare_diff_ext} I think this should not be reported. It may be too much
+                            # Maybe just a option to print this level of detail?
+                            self.print(
+                                '\nNo duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}\n'.format(tmp_dir1,
+                                                                                                       dir2))
 
+                        self.move_duplicate_files(self.dcmp, tmp_dir1, file_extension=convertible_ext)
+
+                        if self.left_only_found:
+                            self.print("Unique files in dir 1: {}\n".format(dir1))
+                            # for filepath in self.left_only_found:
+                            # print("\t{}".format(filepath))
+
+                        # Do we need to display all of these files? TODO: Make a flag for this
+                        if False and self.right_only_found:
+                            self.print("Unique files in dir 2: {}\n".format(dir2))
+                            for filepath in self.right_only_found:
+                                self.print("\t{}".format(filepath))
+
+            # Cleanup compare_diff_ext settings
+            self.reuse_duplicates_dir = False
         else:
             return self.compare_folders_impl(dir1, dir2)
 
     def compare_folders_impl(self, dir1, dir2):
 
+        # TODO: feature{better_dir1_dir2} Need to make clear which is which with better naming (e.i. dup_dir, orig_dir)
         if dir1 == '':
             if dir2 == '':
                 self.print('dir1 and dir2 are empty')
@@ -148,31 +176,35 @@ class Comparator:
         if not self.dcmp: return False
         self.parse_comparison()
 
-        # get current time for duplicates folder name
-        obj = datetime.now()
-        timestamp_str = obj.strftime("%d-%b-%Y-%H-%M-%S")
-        self.print('Current Timestamp : ', timestamp_str)
-        duplicate_folder = 'duplicates_' + timestamp_str
+        # TODO: feature{compare_diff_ext} replace ignore_extension with something like compare_diff_ext or something
+        # only assign new duplicates dir if not wanting to reuse (will reuse in ignore_extension workflow)
+        if not self.reuse_duplicates_dir:
+            # get current time for duplicates folder name
+            obj = datetime.now()
+            timestamp_str = obj.strftime("%d-%b-%Y-%H-%M-%S")
+            self.print('Current Timestamp : ', timestamp_str)
+            duplicate_folder = 'duplicates_' + timestamp_str
+            # TODO: feature{compare_diff_ext} Need a way to reuse/assign the duplicate folder name when doing all new compare
+            # operations with ignore_extension workflow. This will ensure that a single duplicates folder is created for the
+            # compare operation instead of like 5 or 6.
 
-        # construct the comparisons folder to dump duplicate files
-        src_dir = Path(dir1)
-        src_dir_parent = src_dir.parent
-        duplicates_dir = Path(src_dir_parent, 'comparisons', duplicate_folder)
-        self.duplicates_dir = duplicates_dir
+            # construct the comparisons folder to dump duplicate files
+            src_dir = Path(dir1)
+            src_dir_parent = src_dir.parent
+            duplicates_dir = Path(src_dir_parent, 'comparisons', duplicate_folder)
+            self.duplicates_dir = duplicates_dir
+
         self.comparisons_dir = Path(src_dir_parent, 'comparisons')
-        # TODO: Call this something other than comparison dir when it's really the duplicates dir
+
         if not os.path.isdir(Path(src_dir_parent, 'comparisons')):
             os.makedirs(Path(src_dir_parent, 'comparisons'))
-
-        CompareInfo = namedtuple('CompareInfo', 'dir1, dir2, timestamp, move_dir')
-        compareInfo = CompareInfo(dir1, dir2, timestamp_str, duplicates_dir)
 
         if self.dcmp.same_files:
             self.duplicates_found = True
         else:
             self.print('\nNo duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}\n'.format(self.dcmp.left, self.dcmp.right))
 
-        self.move_duplicate_files(self.dcmp, compareInfo)
+        self.move_duplicate_files(self.dcmp, dir1)
 
         if self.left_only_found:
             self.print("Unique files in dir 1: {}\n".format(dir1))
@@ -181,26 +213,38 @@ class Comparator:
 
         # Do we need to display all of these files? TODO: Make a flag for this
         if False and self.right_only_found:
-            self.print("Unique files in dir 2: {}\n".format(dir1))
+            self.print("Unique files in dir 2: {}\n".format(dir2))
             for filepath in self.right_only_found:
                 self.print("\t{}".format(filepath))
 
         return True
 
-    def move_duplicate_files(self, dcmp, compare_info):
+    def move_duplicate_files(self, dcmp, src_dir, file_extension=None):
         # This method takes the results of the dcmp and for all in dcmp.same_files, move those files
+        # optional file_extension argument is used to ignore extension of file used in dcmp.same_files
+        # and overwrite it with the provided file extension. This facilitates different extensions being
+        # compared and moved
 
         # TODO: feature{compare_diff_name} name could be different and still be a duplicate - how to manage this?
         for name in dcmp.same_files:
             self.print("same_file found: {}\n\tsrc {}\n\tdup {}".format(name, Path(dcmp.left, name), Path(dcmp.right, name)))
 
             if self.move_duplicates:
-                left_relative = Path(dcmp.left).relative_to(compare_info.dir1)
-                move_dir = Path(compare_info.move_dir, str(left_relative))
+                left_relative = Path(dcmp.left).relative_to(src_dir)
+                move_dir = Path(self.duplicates_dir, str(left_relative))
                 if not os.path.isdir(move_dir):
                     os.makedirs(move_dir)
-                shutil.move(Path(dcmp.left, name), Path(move_dir, name))
-                self.print("\tmvd {}".format(Path(move_dir, name)))
+
+                # Change extension or not
+                if file_extension is None:
+                    file_name = name
+                else:
+                    file, ext = os.path.splitext(name)
+                    file_name = file + file_extension
+
+                # Move the duplicate file
+                shutil.move(Path(dcmp.left, file_name), Path(move_dir, file_name))
+                self.print("\tmvd {}".format(Path(move_dir, file_name)))
 
                 # TODO apparently not all subdirectories are being removed
                 # remove the directory if all files have been moved
@@ -208,26 +252,14 @@ class Comparator:
                     os.rmdir(dcmp.left)
 
         for sub_dcmp in dcmp.subdirs.values():
-            self.move_duplicate_files(sub_dcmp, compare_info)
-
-    def move_duplicate_files2(self, compare_info):
-
-        for name in compare_info.match:
-            self.print("same_file {} found in {} and {}".format(name, compare_info.dir1, compare_info.dir2))
-            md = compare_info.move_dir
-            if not os.path.isdir(md):
-                os.mkdir(md)
-            shutil.move(Path(compare_info.dir1, name), Path(md, name))
-
-        #for sub_dcmp in dcmp.subdirs.values():
-        #    self.move_duplicate_files(sub_dcmp, compare_info)
+            self.move_duplicate_files(sub_dcmp, src_dir, file_extension)
 
 
 def compare_legacy_to_latest(latest_dir, month_str):
 
     # for each latest directory, run automated comparison
     for m in month_str:
-        self.print('\nRunning comparision operation\n')
+        print('\nRunning comparision operation\n')
 
         duplicate_dir = str(Path(latest_dir, m + ' latest'))
         dir_untouched_original = duplicate_dir.replace(' latest', '')
