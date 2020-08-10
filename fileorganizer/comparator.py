@@ -27,14 +27,14 @@ class Dircmp(filecmp.dircmp):
 
 class Comparator:
 
-    def __init__(self, move_duplicates=True, print_output=True):
+    def __init__(self, move_duplicates=True, print_output=True, ignore_extensions=False):
         self.move_duplicates = move_duplicates
         self.duplicates_found = False
         self.left_only_found = []
         self.right_only_found = []
         self.dcmp = []
         self.print_output = print_output
-        self.ignore_extensions = False
+        self.ignore_extensions = ignore_extensions
         self.comparisons_dir = ''
         self.duplicates_dir = ''
 
@@ -98,14 +98,10 @@ class Comparator:
                         self.compare_folders_impl(tmp_dir1, dir2)
 
                         # Move files from dir1 that come back as dcmp.samefiles from this comparison
+                        # TODO: Need to avoid mistakenly moving a file from a subdirectory with the same name
+                        # TODO: Need to track the exact path to a file and only move ones that match same_files and same path
+                        # TODO: Perhaps modify the dcmp.same_files on every subdcmp and pass that to move_duplicates?
 
-
-                # Check for any files in dir1 that can be converted to dir2 extensions
-                # For each of the convertible extensions from dir1 to dir2
-                    # Track the dir1 files that I'm about to compare with
-                    # Copy those files to a temporary directory
-                    # Compare dir1_JPG_to_jpeg with dir2 and save same files
-                    #
         else:
             return self.compare_folders_impl(dir1, dir2)
 
@@ -192,14 +188,15 @@ class Comparator:
         return True
 
     def move_duplicate_files(self, dcmp, compare_info):
+        # This method takes the results of the dcmp and for all in dcmp.same_files, move those files
 
-        # TODO name could be different and still be a duplicate - how to manage this?
+        # TODO: feature{compare_diff_name} name could be different and still be a duplicate - how to manage this?
         for name in dcmp.same_files:
             self.print("same_file found: {}\n\tsrc {}\n\tdup {}".format(name, Path(dcmp.left, name), Path(dcmp.right, name)))
 
             if self.move_duplicates:
-                right_relative = Path(dcmp.right).relative_to(compare_info.dir2)
-                move_dir = Path(compare_info.move_dir, str(right_relative))
+                left_relative = Path(dcmp.left).relative_to(compare_info.dir1)
+                move_dir = Path(compare_info.move_dir, str(left_relative))
                 if not os.path.isdir(move_dir):
                     os.makedirs(move_dir)
                 shutil.move(Path(dcmp.left, name), Path(move_dir, name))
