@@ -55,6 +55,7 @@ class CompareTests(unittest.TestCase):
         dcmp = comp.dcmp
 
         # if identical, no unique files in either directory
+        # TODO: This is currently passing for the wrong reason. these aren't ever filled
         self.assertEmpty(comp.left_only_found)
         self.assertEmpty(comp.right_only_found)
 

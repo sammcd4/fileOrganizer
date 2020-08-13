@@ -10,8 +10,9 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(len(obj), 0, "Object is not empty")
 
     def test_get_extensions(self):
-        # TODO: Need to implement get_extensions
-        self.assertTrue(False)
+        self.assertEqual(utils.get_extensions('../files/identical/diffext1'), ['.JPEG', '.JPG'])
+        self.assertEqual(utils.get_extensions('../files/identical/dir1'), ['.JPG', '.mp4', '.mov'])
+        # TODO: Should the order matter?
 
     def test_get_convertible_extensions(self):
         self.assertEqual(utils.get_convertible_extensions('.JPG'), ['.jpg', '.jpeg', '.JPEG'])
@@ -33,6 +34,7 @@ class UtilsTests(unittest.TestCase):
 
         # no match
         self.assertEqual(utils.get_convertible_extensions('.blah'), [])
+
 
 if __name__ == '__main__':
     unittest.main()

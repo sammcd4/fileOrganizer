@@ -40,6 +40,7 @@ class Comparator:
         self.reuse_duplicates_dir = False
 
     def parse_comparison(self, dcmp):
+
         # alert of diff files found in these directories
         for name in dcmp.diff_files:
             self.print("diff_file found: {}\n\tdir1 {}\n\tdir2 {}".format(name, self.dcmp.left, self.dcmp.right))
@@ -47,12 +48,18 @@ class Comparator:
         # TODO: feature{compare_diff_ext} Only count left only if all comparisons have left only
         for name in dcmp.left_only:
             #self.print("\t{}".format(name))
-            self.left_only_found.append(Path(self.dcmp.left, name))
+            if self.ignore_extensions:
+                pass
+            else:
+                self.left_only_found.append(Path(self.dcmp.left, name))
 
         #  TODO: feature{compare_diff_ext} Only count right only if all comparisons have right only
         for name in dcmp.right_only:
             #self.print("\t{}".format(name))
-            self.right_only_found.append(Path(self.dcmp.right, name))
+            if self.ignore_extensions:
+                pass
+            else:
+                self.right_only_found.append(Path(self.dcmp.right, name))
 
         # TODO: figure out what I was doing here recursively
         for sub_dcmp in dcmp.subdirs.values():
@@ -75,6 +82,8 @@ class Comparator:
             ext_in_dir1 = utils.get_extensions(dir1)
             ext_in_dir2 = utils.get_extensions(dir2)
 
+            base_comparisons_dir = self.comparisons_dir
+
             for ext_dir2 in ext_in_dir2:
 
                 # iterate over all convertible and see if ext_in_dir1 has one
@@ -89,7 +98,7 @@ class Comparator:
                         # Copy all those convertible files to a temp directory
                         tmp_dir_name = 'dir1_' + convertible_ext.replace('.', '') + '_to_' + ext_dir2.replace('.', '')
                         # self.duplicates_dir should be assigned because compare_folders(dir1, dir2) has been called
-                        tmp_dir1 = Path(self.comparisons_dir, tmp_dir_name)
+                        tmp_dir1 = Path(base_comparisons_dir, tmp_dir_name)
                         if not os.path.isdir(tmp_dir1):
                             os.mkdir(tmp_dir1)
 
@@ -130,8 +139,14 @@ class Comparator:
                             for filepath in self.right_only_found:
                                 self.print("\t{}".format(filepath))
 
+                        # Cleanup this temp directory for this convertible extension
+                        shutil.rmtree(tmp_dir1, ignore_errors=True)
+
             # Cleanup compare_diff_ext settings
             self.reuse_duplicates_dir = False
+
+            # Cleanup extra comparisions directory
+            shutil.rmtree(base_comparisons_dir, ignore_errors=True)
 
             return True
         else:
@@ -182,6 +197,7 @@ class Comparator:
             return False
         self.parse_comparison(self.dcmp)
 
+        # Know where to create comparisons dir
         src_dir = Path(dir1)
         src_dir_parent = src_dir.parent
 
