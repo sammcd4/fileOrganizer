@@ -59,11 +59,16 @@ def get_convertible_extensions(extension):
         return ['.png']
     elif extension == '.png':
         return ['.PNG']
+    elif extension.islower():
+        return [extension.upper()]
+    elif extension.isupper():
+        return [extension.lower()]
     else:
-        return []
+        # mixed lower/upper case, so return both as convertible
+        return [extension.lower(), extension.upper()]
 
 
-def modifyextensions(directory, extensions, reverse_conversion=False):
+def modify_extensions(directory, extensions, reverse_conversion=False):
 
     if not os.path.isdir(directory):
         print('Non-existent directory: ', directory)
@@ -88,7 +93,7 @@ def modifyextensions(directory, extensions, reverse_conversion=False):
             print('Rename file:\n\t{}\n\t{}'.format(filepath, new_path))
 
 
-def oldPhotosExtensions(directory, reverse_conversion=True):
+def old_photos_extensions(directory, reverse_conversion=True):
     extensions = {
         '.JPG': '.jpeg',
         '.MOV': '.mov',
@@ -97,21 +102,21 @@ def oldPhotosExtensions(directory, reverse_conversion=True):
         '.CR2': '.cr2',
         '.AAE': '.aae'
     }
-    modifyextensions(directory, extensions, reverse_conversion)
+    modify_extensions(directory, extensions, reverse_conversion)
 
 
-def newPhotosExtensions(directory):
-    oldPhotosExtensions(directory, False)
+def new_photos_extensions(directory):
+    old_photos_extensions(directory, False)
 
 
-def movExtensions(directory):
+def mov_extensions(directory):
     extensions = {
         '.MOV': '.mov'
     }
-    modifyextensions(directory, extensions)
+    modify_extensions(directory, extensions)
 
-def MOVExtensions(directory):
+def MOV_extensions(directory):
     extensions = {
         '.MOV': '.mov'
     }
-    modifyextensions(directory, extensions, True)
+    modify_extensions(directory, extensions, True)

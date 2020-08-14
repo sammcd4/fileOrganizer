@@ -3,6 +3,7 @@ from fileorganizer.comparator import Comparator
 import os
 import shutil
 
+
 class CompareTests(unittest.TestCase):
 
     move_duplicates = False
@@ -45,6 +46,10 @@ class CompareTests(unittest.TestCase):
         # all common file names should also be identical
         self.assertEqual(dcmp.common_files, dcmp.same_files)
         self.assertFalse(dcmp.diff_files)
+
+    def test_all_identical_nested(self):
+        # TODO: feature{nested_compare}
+        self.assertTrue(False)
 
     def test_identical_diffext(self):
         # Setup

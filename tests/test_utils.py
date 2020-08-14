@@ -33,7 +33,7 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(utils.get_convertible_extensions('.PNG'), ['.png'])
 
         # no match
-        self.assertEqual(utils.get_convertible_extensions('.blah'), [])
+        self.assertEqual(utils.get_convertible_extensions('.blah'), ['.BLAH'])
 
 
 if __name__ == '__main__':

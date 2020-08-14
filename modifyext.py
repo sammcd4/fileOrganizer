@@ -13,9 +13,9 @@ def modify_exts(directory):
         '.AAE': '.aae'
     }
 
-    utils.modifyextensions(directory, extensions, True)
-    #utils.oldPhotosExtensions(directory)
-    #utils.movExtensions(directory)
+    utils.modify_extensions(directory, extensions, True)
+    #utils.old_photos_extensions(directory)
+    #utils.mov_extensions(directory)
 
 
 if __name__ == '__main__':
