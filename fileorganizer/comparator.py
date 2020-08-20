@@ -38,6 +38,7 @@ class Comparator:
         self.comparisons_dir = ''
         self.duplicates_dir = ''
         self.reuse_duplicates_dir = False
+        self.cleanup_tmp_dir = True
 
     def parse_comparison(self, dcmp):
 
@@ -140,13 +141,15 @@ class Comparator:
                                 self.print("\t{}".format(filepath))
 
                         # Cleanup this temp directory for this convertible extension
-                        shutil.rmtree(tmp_dir1, ignore_errors=True)
+                        if self.cleanup_tmp_dir:
+                            shutil.rmtree(tmp_dir1, ignore_errors=True)
 
             # Cleanup compare_diff_ext settings
             self.reuse_duplicates_dir = False
 
-            # Cleanup extra comparisions directory
-            shutil.rmtree(base_comparisons_dir, ignore_errors=True)
+            # Cleanup extra comparisons directory
+            if self.cleanup_tmp_dir:
+                shutil.rmtree(base_comparisons_dir, ignore_errors=True)
 
             return True
         else:
