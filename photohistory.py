@@ -15,14 +15,6 @@ import fileorganizer.utils as utils
 
 print_enabled = False
 
-def get_ext_from_folder(directory):
-    # returns a dictionary of key-value pairs of file extension and number of files
-    ext_dict = {}
-
-    # get all files from the folder
-
-    return ext_dict
-
 
 def parse_types(types_dict):
     # given a dictionary of types, return a new dictionary of generalized types, based on what is being logged
@@ -58,7 +50,7 @@ def init_types(types):
     return type_dict
 
 
-def update_type(types_dict, a_type, file):
+def increment_type_data(types_dict, a_type, file):
     types_dict[a_type]['count'] += 1
     types_dict[a_type]['size'] += get_file_size(file, 'MB')
 
@@ -68,12 +60,12 @@ def get_types_from_folder(directory):
     types_dict = {}
 
     # extensions
-    photo_exts = ['.jpg', '.JPG', '.JPEG', '.jpeg']
-    video_exts = ['.mov', '.MOV', '.AVI', '.avi', '.mpg', '.MPG', '.m4v', '.M4V']
-    live_photo_ext = ['LivePhoto.jpg', 'LivePhoto.JPG', 'LivePhoto.jpeg', 'LivePhoto.heic']
-    live_photo_mov_ext = ['LivePhoto.mov', 'LivePhoto.MOV']
-    screenshot_exts = ['.png', '.PNG']
-    raw_exts = ['.cr2', '.CR2']
+    photo_exts = utils.get_extensions_from_type('photo')
+    video_exts = utils.get_extensions_from_type('video')
+    live_photo_ext = utils.get_extensions_from_type('livephoto')
+    live_photo_mov_ext = utils.get_extensions_from_type('livephotovideo')
+    screenshot_exts = utils.get_extensions_from_type('screenshot')
+    raw_exts = utils.get_extensions_from_type('raw')
 
     # find all photos
     num_photos_glob = 0
@@ -108,11 +100,11 @@ def get_types_from_folder(directory):
 
         if any(ext in file_str for ext in live_photo_ext):
             # Live Photo
-            update_type(types_dict, 'livephoto', file)
+            increment_type_data(types_dict, 'livephoto', file)
 
         elif any(ext in file_str for ext in live_photo_mov_ext):
             # Live Photo videos
-            update_type(types_dict, 'livephotovideo', file)
+            increment_type_data(types_dict, 'livephotovideo', file)
 
         elif any(ext in file_str for ext in photo_exts):
             # Photo
@@ -144,23 +136,23 @@ def get_types_from_folder(directory):
             else:
                 photo_type = 'photo'
 
-            update_type(types_dict, photo_type, file)
+            increment_type_data(types_dict, photo_type, file)
 
         elif any(ext in file_str for ext in video_exts):
             # Video
-            update_type(types_dict, 'video', file)
+            increment_type_data(types_dict, 'video', file)
 
         elif any(ext in file_str for ext in screenshot_exts):
             # Screenshots
-            update_type(types_dict, 'screenshot', file)
+            increment_type_data(types_dict, 'screenshot', file)
 
         elif any(ext in file_str for ext in raw_exts):
             # Raw photos
-            update_type(types_dict, 'raw', file)
+            increment_type_data(types_dict, 'raw', file)
 
         else:
             # Other files
-            update_type(types_dict, 'other', file)
+            increment_type_data(types_dict, 'other', file)
 
     # verify count of all photos, otherwise exit
     #print(types_dict['applephoto']['count'])
@@ -242,6 +234,7 @@ if __name__ == '__main__':
     if mode == 'single':
         directory1 = '/Users/sammcdonald/Documents/photos'
         #directory1 = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/01 January'
+        directory1 = 'files/identical/dir1'
         types_dict = get_types_from_folder(directory1)
         print(types_dict)
 

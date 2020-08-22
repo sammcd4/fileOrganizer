@@ -15,6 +15,15 @@ class CompareTests(unittest.TestCase):
     def assertEmpty(self, obj):
         self.assertEqual(len(obj), 0, "Object is not empty")
 
+    def assertDcmpIdentical(self, dcmp):
+
+        # all common file names should also be identical
+        self.assertEqual(dcmp.common_files, dcmp.same_files)
+        self.assertFalse(dcmp.diff_files)
+
+        for sub_dcmp in dcmp.subdirs.values():
+            self.assertDcmpIdentical(sub_dcmp)
+
     def compare_dirs(self, parent_dir, folder1, folder2):
         comp = Comparator(self.move_duplicates, self.print_output, self.ignore_extensions)
         dir1 = parent_dir + folder1
@@ -56,9 +65,7 @@ class CompareTests(unittest.TestCase):
         self.assertFalse(comp.left_only_found)
         self.assertFalse(comp.right_only_found)
 
-        # all common file names should also be identical
-        self.assertEqual(dcmp.common_files, dcmp.same_files)
-        self.assertFalse(dcmp.diff_files)
+        self.assertDcmpIdentical(dcmp)
 
     def test_identical_diffext(self):
         # Setup
@@ -82,6 +89,7 @@ class CompareTests(unittest.TestCase):
 
     def test_identical_diffname(self):
 
+        # TODO: {feature: compare_diff_name} Need to design tasks for this feature
         # Identical files (but different filenames) compare equal
         comp = self.compare_identical_dirs('diffname1', 'diffname2')
 
@@ -127,7 +135,19 @@ class CompareTests(unittest.TestCase):
         pass
 
     def test_diff_diff_ext(self):
-        pass
+        # Setup
+        self.ignore_extensions = True
+
+        # Different files (same name but different extensions) compare different
+        comp = self.compare_different_dirs('diffext1', 'diffext2')
+        dcmp = comp.dcmp
+
+        # there should be common files (files of same name, even with diff ext) and no same files (identical files)
+        self.assertTrue(dcmp.common_files)
+        self.assertEmpty(dcmp.same_files)
+
+        # Cleanup
+        self.ignore_extensions = False
 
     def test_diff_same_filenames(self):
 

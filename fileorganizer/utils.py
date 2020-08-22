@@ -25,7 +25,7 @@ def get_extensions(directory):
     return exts
 
 
-def get_convertible_extensions(extension):
+def get_convertible_extensions(extension, prepend=None):
     # given a file extension, get a list of all similar extensions
     if extension == '.JPG':
         return ['.jpg', '.jpeg', '.JPEG']
@@ -66,6 +66,38 @@ def get_convertible_extensions(extension):
     else:
         # mixed lower/upper case, so return both as convertible
         return [extension.lower(), extension.upper()]
+
+
+def get_extensions_from_type(type):
+    if type == 'photo':
+        return get_extension_variations('.jpg')
+    elif type == 'video':
+        return get_extension_variations(['.mp4', '.mov', '.avi', '.mpg', '.m4v'])
+    elif type == 'livephoto':
+        return get_extension_variations(['.jpg', '.heic'], prepend_str='LivePhoto')
+    elif type == 'livephotovideo':
+        return get_extension_variations('.mov', prepend_str='LivePhoto')
+    elif type == 'screenshot':
+        return get_extension_variations('.png')
+    elif type == 'raw':
+        return get_extension_variations('.cr2')
+
+
+def get_extension_variations(extension, prepend_str=None):
+    if isinstance(extension, list):
+        # for every extension, run the same algorithm and create list of all
+        extensions = []
+        for ext in extension:
+            extensions.extend(get_extension_variations(ext))
+    else:
+        # implementation for a single extension
+        extensions = [extension]
+        extensions.extend(get_convertible_extensions(extension))
+
+    if prepend_str is not None:
+        extensions = [(prepend_str + '{0}').format(ext) for ext in extensions]
+
+    return extensions
 
 
 def modify_extensions(directory, extensions, reverse_conversion=False):
