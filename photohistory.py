@@ -9,8 +9,37 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 import itertools
 import fileorganizer.utils as utils
+from datetime import date
+from calendar import monthrange
 
 # Methods to extract count and size of photos/videos for each month
+
+
+class DateRange:
+    def __init__(self, start=None, end=None, year=None, month=None):
+        self.start = start
+        self.end = end
+
+        if year is not None and month is not None:
+            self.set_start_end_from_yr_mo(year, month)
+
+    def set_start_end_from_yr_mo(self, year, month):
+        self.start = date(year, month, 1)
+
+        days_in_month = self.get_days_from_month(year, month)
+        self.end = date(year, month, days_in_month)
+
+    def get_days_from_month(self, year, month):
+        result = monthrange(year, month)
+        return result[1]
+
+    def is_in_date_range(self, a_date):
+        if self.start <= a_date <= self.end:
+            return True
+        else:
+            return False
+
+
 # TODO: make photohistory class to encapsulate methods and printing options
 
 print_enabled = False
@@ -28,9 +57,11 @@ def get_file_size(file, unit=None):
     return round(convert_bytes(os.path.getsize(file), unit), 3)
 
 
-def convert_bytes(size, unit=None):
+def convert_bytes(size, unit='B'):
     factor = 1000 # non-binary conversion
-    if unit == "KB":
+    if unit == "B":
+        return size
+    elif unit == "KB":
         return size / factor
     elif unit == "MB":
         return size / (factor * factor)
@@ -55,9 +86,12 @@ def increment_type_data(types_dict, a_type, file):
     types_dict[a_type]['size'] += get_file_size(file, 'MB')
 
 
-def get_types_from_folder(directory):
+def is_file_in_date_range(file, date_range):
+    # TODO: need to get file date, creation date, compare that to date_range
 
-    types_dict = {}
+    pass
+
+def get_types_from_folder(directory, date_range=None):
 
     # extensions
     photo_exts = utils.get_extensions_from_type('photo')
@@ -86,6 +120,10 @@ def get_types_from_folder(directory):
     # find all file types (count and size)
     files = Path(directory).rglob('**/*.*') # option to get all files recursively or not
     for file in files:
+
+        # filter out any file that is outside date range
+        if is_file_in_date_range(file, date_range):
+            continue
 
         # because path is object not string
         file_str = str(file)
