@@ -13,6 +13,14 @@ class UtilsTests(unittest.TestCase):
         for ext in extensions:
             self.assertCountEqual(utils.get_extension_variations(ext), extensions, kargs)
 
+    def test_get_month_int(self):
+        # verify month names and abbreviations can be converted
+        month_names = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December']
+        for idx, name in enumerate(month_names):
+            self.assertEqual(utils.get_month_int(name), idx+1)
+            self.assertEqual(utils.get_month_int(name[:3]), idx+1)
+
     def test_get_extension_variations(self):
         photo_ext = ['.JPG', '.jpg', '.jpeg', '.JPEG']
         self.assertExtensionVariations(photo_ext)
