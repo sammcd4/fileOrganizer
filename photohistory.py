@@ -9,8 +9,9 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 import itertools
 import fileorganizer.utils as utils
-from datetime import date
+from datetime import date, datetime
 from calendar import monthrange
+import platform
 
 # Methods to extract count and size of photos/videos for each month
 
@@ -19,6 +20,13 @@ class DateRange:
     def __init__(self, start=None, end=None, year=None, month=None):
         self.start = start
         self.end = end
+
+        # handle string input by converting to integer
+        if isinstance(year, str):
+            year = int(year)
+
+        if isinstance(month, str):
+            month = utils.get_month_int(month)
 
         if year is not None and month is not None:
             self.set_start_end_from_yr_mo(year, month)
@@ -88,8 +96,27 @@ def increment_type_data(types_dict, a_type, file):
 
 def is_file_in_date_range(file, date_range):
     # TODO: need to get file date, creation date, compare that to date_range
+    file_date = get_creation_date(file)
+    return date_range.is_in_date_range(file_date)
 
-    pass
+
+def get_creation_date(path_to_file):
+    """
+    Try to get the date that a file was created, falling back to when it was
+    last modified if that isn't possible.
+    See http://stackoverflow.com/a/39501288/1709587 for explanation.
+    """
+    if platform.system() == 'Windows':
+        return datetime.fromtimestamp(os.path.getctime(path_to_file)).date()
+    else:
+        stat = os.stat(path_to_file)
+        try:
+            return datetime.fromtimestamp(stat.st_birthtime).date()
+        except AttributeError:
+            # We're probably on Linux. No easy way to get creation dates here,
+            # so we'll settle for when its content was last modified.
+            return datetime.fromtimestamp(stat.st_mtime).date()
+
 
 def get_types_from_folder(directory, date_range=None):
 
@@ -122,7 +149,7 @@ def get_types_from_folder(directory, date_range=None):
     for file in files:
 
         # filter out any file that is outside date range
-        if is_file_in_date_range(file, date_range):
+        if date_range is not None and not is_file_in_date_range(file, date_range):
             continue
 
         # because path is object not string
@@ -204,8 +231,10 @@ def get_types_from_folder(directory, date_range=None):
     file_counter = 0
     for type, data in types_dict.items():
         file_counter += data['count']
-    assert file_count == file_counter
-    print('All files have been counted and sized')
+    print('Total files found: {}'.format(file_counter))
+    if not date_range:
+        assert file_count == file_counter
+        print('All files have been counted and sized')
 
     return types_dict
 
@@ -273,7 +302,9 @@ if __name__ == '__main__':
         directory1 = '/Users/sammcdonald/Documents/photos'
         #directory1 = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/01 January'
         directory1 = 'files/identical/dir1'
-        types_dict = get_types_from_folder(directory1)
+        date_range = DateRange(year=2020, month='January')
+        #date_range=None
+        types_dict = get_types_from_folder(directory1, date_range=date_range)
         print(types_dict)
 
         write_excel(types_dict)

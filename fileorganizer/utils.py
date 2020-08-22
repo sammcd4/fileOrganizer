@@ -1,5 +1,14 @@
 import os
 import glob
+import calendar
+
+
+def get_month_int(month_str):
+    str_to_num = {name: num for num, name in enumerate(calendar.month_abbr) if num}
+    name_to_num = {name: num for num, name in enumerate(calendar.month_name) if num}
+    str_to_num.update(name_to_num) # merge dictionaries
+    
+    return str_to_num[month_str]
 
 
 def get_num_files(directory, ext, recursive=True):
