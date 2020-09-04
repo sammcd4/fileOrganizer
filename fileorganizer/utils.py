@@ -11,6 +11,22 @@ def get_month_int(month_str):
     return str_to_num[month_str]
 
 
+def get_month_folder_names():
+    # TODO make this better
+    return ['01 January',
+            '02 February',
+            '03 March',
+            '04 April',
+            '05 May',
+            '06 June',
+            '07 July',
+            '08 August',
+            '09 September',
+            '10 October',
+            '11 November',
+            '12 December']
+
+
 def get_num_files(directory, ext, recursive=True):
     # use glob.glob to search for files with the specified extension
     return len(get_files_with_ext(directory, ext, recursive))
@@ -18,7 +34,7 @@ def get_num_files(directory, ext, recursive=True):
 
 def get_files_with_ext(directory, ext, recursive=True):
     # use glob.glob to search for files with the specified extension
-    return glob.glob(directory + '/**/*' + ext, recursive=recursive)
+    return glob.glob(str(directory) + '/**/*' + ext, recursive=recursive)
 
 
 def get_extensions(directory):
