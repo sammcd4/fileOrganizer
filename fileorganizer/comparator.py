@@ -104,6 +104,7 @@ class Comparator:
                             os.mkdir(tmp_dir1)
 
                         # Convert all files that match this extension, preserving file path
+                        self.print('Converting all files into temp directory with new extension...')
                         for orig_file in orig_files:
                             relative_file_path = Path(orig_file).relative_to(dir1)
                             orig_file_name = os.path.basename(orig_file)
@@ -113,6 +114,7 @@ class Comparator:
                             converted_file_name = orig_file_name.replace(convertible_ext, ext_dir2)
                             if os.path.isfile(orig_file):
                                 shutil.copy(orig_file, os.path.join(tmp_dir1, relative_file_path_parent, converted_file_name))
+                        self.print('Finished converting all files')
 
                         # Now that all relevant files are in the tmp directory, make the comparison
                         self.compare_folders_impl(tmp_dir1, dir2)
@@ -127,7 +129,8 @@ class Comparator:
                                 '\nNo duplicates found when comparing:\n\tdir1 {}\n\tdir2 {}\n'.format(tmp_dir1,
                                                                                                        dir2))
 
-                        self.move_duplicate_files(self.dcmp, tmp_dir1, file_extension=convertible_ext)
+                        # If same files were found here, then they need to be moved from dir1 with the original extension
+                        self.move_duplicate_files(self.dcmp, dir1, file_extension=convertible_ext)
 
                         if self.left_only_found:
                             self.print("Unique files in dir 1: {}\n".format(dir1))
@@ -148,7 +151,8 @@ class Comparator:
             self.reuse_duplicates_dir = False
 
             # Cleanup extra comparisons directory
-            if self.cleanup_tmp_dir:
+            print('This is trying to be deleted: {}'.format(base_comparisons_dir))
+            if self.cleanup_tmp_dir and False: # TODO: This is probably not necessary
                 shutil.rmtree(base_comparisons_dir, ignore_errors=True)
 
             return True
@@ -250,12 +254,20 @@ class Comparator:
         # and overwrite it with the provided file extension. This facilitates different extensions being
         # compared and moved
 
+        # src_dir is used to configure the relative path to the file being moved, but ignore_extensions messes with the
+        # assumption that dcmp.left is relative to src_dir. Logic is added to simply eliminate the relative path when
+        # file_extension is not None
+        if file_extension is None:
+            left_dir = dcmp.left
+        else:
+            left_dir = src_dir
+
         # TODO: feature{compare_diff_name} name could be different and still be a duplicate - how to manage this?
         for name in dcmp.same_files:
-            self.print("same_file found: {}\n\tsrc {}\n\tdup {}".format(name, Path(dcmp.left, name), Path(dcmp.right, name)))
+            self.print("same_file found: {}\n\tsrc {}\n\tdup {}".format(name, Path(left_dir, name), Path(dcmp.right, name)))
 
             if self.move_duplicates:
-                left_relative = Path(dcmp.left).relative_to(src_dir)
+                left_relative = Path(left_dir).relative_to(src_dir)
                 move_dir = Path(self.duplicates_dir, str(left_relative))
                 if not os.path.isdir(move_dir):
                     os.makedirs(move_dir)
@@ -267,14 +279,15 @@ class Comparator:
                     file, ext = os.path.splitext(name)
                     file_name = file + file_extension
 
+                self.print("\tfile {} should have ext {}".format(file_name, file_extension))
                 # Move the duplicate file
-                shutil.move(Path(dcmp.left, file_name), Path(move_dir, file_name))
+                shutil.move(Path(left_dir, file_name), Path(move_dir, file_name))
                 self.print("\tmvd {}".format(Path(move_dir, file_name)))
 
                 # TODO apparently not all subdirectories are being removed
                 # remove the directory if all files have been moved
-                if not os.listdir(dcmp.left):
-                    os.rmdir(dcmp.left)
+                if not os.listdir(left_dir):
+                    os.rmdir(left_dir)
 
         for sub_dcmp in dcmp.subdirs.values():
             self.move_duplicate_files(sub_dcmp, src_dir, file_extension)

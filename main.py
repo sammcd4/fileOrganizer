@@ -1,5 +1,7 @@
 import fileorganizer.compare as foc
 import fileorganizer.utils as utils
+import os
+from pathlib import Path
 
 mode = 'multcompare'
 
@@ -8,11 +10,14 @@ mode = 'multcompare'
 if mode == 'compare':
 
     # define directories to compare
-    duplicate_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Video/Camera roll saved'
-    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/01 January'
+    duplicate_dir = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/01 January latest'
+    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2017/01 January'
+
+    #duplicate_dir = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir2'
+    #dir_untouched_original = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir1'
 
     # compare
-    foc.compare(duplicate_dir, dir_untouched_original)
+    foc.compare(duplicate_dir, dir_untouched_original, ignore_extensions=True)
 
 elif mode == 'compare_exts':
     pass
@@ -44,7 +49,14 @@ elif mode == 'multcompare':
         # optionally iterate of several orig dirs too
         orig_dirs = [(dir_untouched_orig_base + month_dir_name) for month_dir_name in utils.get_month_folder_names()]
         for orig_dir in orig_dirs:
-            foc.multcompare(duplicate_dir, orig_dir, ignore_extensions=True)
+            if False:
+                foc.multcompare(duplicate_dir, orig_dir, ignore_extensions=True)
+            else:
+                # iterate only over the relevant month directories
+                for f in os.listdir(duplicate_dir):
+                    path_dir = Path(duplicate_dir, f)
+                    if os.path.isdir(path_dir) and orig_dir.split('/')[-1] in str(path_dir):
+                        foc.compare(path_dir, orig_dir, True, ignore_extensions=True)
     else:
         # only one original directory
         foc.multcompare(duplicate_dir, dir_untouched_original)

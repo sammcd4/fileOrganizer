@@ -87,6 +87,29 @@ class CompareTests(unittest.TestCase):
         # Cleanup
         self.ignore_extensions = False
 
+    def test_identical_diffext2(self):
+        # Setup
+        self.ignore_extensions = True
+
+        # Identical files (but different extensions) compare equal
+        comp = self.compare_identical_dirs('diffext3', 'diffext4')
+        dcmp = comp.dcmp
+
+        # if identical, no unique files in either directory
+        # TODO: This is currently passing for the wrong reason. these aren't ever filled
+        self.assertEmpty(comp.left_only_found)
+        self.assertEmpty(comp.right_only_found)
+
+        # check same number of files in common and same because different extension will make lists unequal
+        self.assertEqual(len(dcmp.common_files), len(dcmp.same_files))
+        self.assertFalse(dcmp.diff_files)
+
+        # Cleanup
+        self.ignore_extensions = False
+
+    def test_orig_directory_untouched(self):
+        pass
+
     def test_identical_diffname(self):
 
         # TODO: {feature: compare_diff_name} Need to design tasks for this feature

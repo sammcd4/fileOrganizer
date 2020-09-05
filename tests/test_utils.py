@@ -21,6 +21,9 @@ class UtilsTests(unittest.TestCase):
             self.assertEqual(utils.get_month_int(name), idx+1)
             self.assertEqual(utils.get_month_int(name[:3]), idx+1)
 
+    def test_get_num_files(self):
+        pass
+
     def test_get_extension_variations(self):
         photo_ext = ['.JPG', '.jpg', '.jpeg', '.JPEG']
         self.assertExtensionVariations(photo_ext)
