@@ -172,8 +172,15 @@ def mov_extensions(directory):
     }
     modify_extensions(directory, extensions)
 
+
 def MOV_extensions(directory):
     extensions = {
         '.MOV': '.mov'
     }
     modify_extensions(directory, extensions, True)
+
+
+# If directory doesn't exist, call os.mkdir
+def mkdir(directory):
+    if not os.path.isdir(directory):
+        os.mkdir(directory)

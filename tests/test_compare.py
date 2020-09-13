@@ -134,11 +134,7 @@ class CompareTests(unittest.TestCase):
 
     def test_funny_files(self):
         # TODO: Write this with some given funny files
-        self.assertEqual(True, True)
-
-    def test_different_filenames(self):
-        # TODO: Write this with filenames that are clearly different
-        self.assertEqual(True, True)
+        self.assertEqual(True, False)
 
     def test_diff_same_name(self):
         # Different files (based on content) compare not equal
