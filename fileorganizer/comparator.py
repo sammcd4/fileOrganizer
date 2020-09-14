@@ -21,8 +21,8 @@ class Dircmp(filecmp.dircmp):
         # TODO Compare files of multiple similar file extensions
         # TODO Compare files of different file paths but same file
         # Possibly copy to a temp directory as a new name and then compare with that file instead?
-        fcomp = filecmp.cmpfiles(self.left, self.right, self.common_files, shallow=False)
-        self.same_files, self.diff_files, self.funny_files = fcomp
+        file_comp = filecmp.cmpfiles(self.left, self.right, self.common_files, shallow=False)
+        self.same_files, self.diff_files, self.funny_files = file_comp
 
 
 class Comparator:
@@ -71,8 +71,7 @@ class Comparator:
             print(*args)
 
     # dir1 contains files to be moved to comparisons folder
-    def compare_folders(self, dir1, dir2):
-        # TODO: Use *args here?
+    def compare_folders(self, dir1, dir2, *args, **kwargs):
 
         if self.ignore_extensions:
             # compare files with unchanged extensions for a baseline
@@ -150,11 +149,12 @@ class Comparator:
 
             return True
         else:
-            return self.compare_folders_impl(dir1, dir2)
+            return self.compare_folders_impl(dir1, dir2, *args, **kwargs)
 
-    def compare_folders_impl(self, dir1, dir2):
+    def compare_folders_impl(self, dir1, dir2, *args, **kwargs):
 
         # TODO: feature{better_dir1_dir2} Need to make clear which is which with better naming (e.i. dup_dir, orig_dir)
+        # TODO: Especially since no where is it stated that dir1 is the one that has files removed from it
         if dir1 == '':
             if dir2 == '':
                 self.print('dir1 and dir2 are empty')
@@ -165,24 +165,6 @@ class Comparator:
         if dir2 == '':
             self.print('dir2 is empty')
             return None
-
-        if False:
-            # Determine the items that exist in both directories
-            d1_contents = set(os.listdir(dir1))
-            d2_contents = set(os.listdir(dir2))
-            common = list(d1_contents & d2_contents)
-            common_files = [f
-                            for f in common
-                            if os.path.isfile(os.path.join(dir1, f))
-                            ]
-            self.print('Common files:{}'.format(common_files))
-
-            # Compare the directories
-            match, mismatch, errors = filecmp.cmpfiles(dir1, dir2, common_files, shallow=False)
-
-            self.print('Match:{}'.format(match))
-            self.print('Mismatch:{}'.format(mismatch))
-            self.print('Errors:{}'.format(errors))
 
         if not os.path.isdir(dir1):
             self.print('Non-existent directory: ', dir1)
@@ -207,11 +189,8 @@ class Comparator:
             # get current time for duplicates folder name
             obj = datetime.now()
             timestamp_str = obj.strftime("%d-%b-%Y-%H-%M-%S")
-            self.print('Current Timestamp : ', timestamp_str)
+            self.print('Current timestamp : ', timestamp_str)
             duplicate_folder = 'duplicates_' + timestamp_str
-            # TODO: feature{compare_diff_ext} Need a way to reuse/assign the duplicate folder name when doing all new compare
-            # operations with ignore_extension workflow. This will ensure that a single duplicates folder is created for the
-            # compare operation instead of like 5 or 6.
 
             # construct the comparisons folder to dump duplicate files
             duplicates_dir = Path(src_dir_parent, 'comparisons', duplicate_folder)
@@ -228,16 +207,17 @@ class Comparator:
 
         self.move_duplicate_files(self.dcmp, dir1)
 
-        if self.left_only_found:
-            self.print("Unique files in dir 1: {}\n".format(dir1))
-            #for filepath in self.left_only_found:
-                #print("\t{}".format(filepath))
+        # parse keyword arguments for optional print outs
+        for k, v in kwargs.items():
+            if k == 'print_left_only' and v and self.left_only_found:
+                self.print("Unique files in dir 1: {}\n".format(dir1))
+                for file_path in self.left_only_found:
+                    print("\t{}".format(file_path))
 
-        # Do we need to display all of these files? TODO: Make a flag for this
-        if False and self.right_only_found:
-            self.print("Unique files in dir 2: {}\n".format(dir2))
-            for filepath in self.right_only_found:
-                self.print("\t{}".format(filepath))
+            if k == 'print_right_only' and v and self.right_only_found:
+                self.print("Unique files in dir 2: {}\n".format(dir2))
+                for file_path in self.right_only_found:
+                    self.print("\t{}".format(file_path))
 
         return True
 

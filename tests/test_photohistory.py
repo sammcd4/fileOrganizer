@@ -1,5 +1,5 @@
 import unittest
-from photohistory import get_types_from_folder
+from photohistory import get_types_from_folder, DateRange
 
 
 class PhotoHistoryTests(unittest.TestCase):
@@ -27,6 +27,28 @@ class PhotoHistoryTests(unittest.TestCase):
         self.assert_type_count(types_dict, 'video', 1)
         self.assert_type_count(types_dict, 'livephoto', 3)
         self.assert_type_count(types_dict, 'livephotovideo', 3)
+
+    def test_date_range(self):
+        # Not in range
+        date_range = DateRange(year=2020, month='February')
+        types_dict = get_types_from_folder(self.dir1, date_range=date_range)
+
+        self.assert_type_count(types_dict, 'photo', 0)
+        self.assert_type_count(types_dict, 'video', 0)
+        self.assert_type_count(types_dict, 'livephoto', 0)
+        self.assert_type_count(types_dict, 'livephotovideo', 0)
+
+        # In range
+        date_range = DateRange(year=2020, month='March')
+        types_dict = get_types_from_folder(self.dir1, date_range=date_range)
+
+        self.assert_type_count(types_dict, 'photo', 2)
+        self.assert_type_count(types_dict, 'video', 1)
+        self.assert_type_count(types_dict, 'livephoto', 3)
+        self.assert_type_count(types_dict, 'livephotovideo', 3)
+
+    def test_use_earlier_modified_time(self):
+        self.assertTrue(False)
 
 
 if __name__ == '__main__':

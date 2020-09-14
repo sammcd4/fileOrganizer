@@ -11,7 +11,6 @@ import itertools
 import fileorganizer.utils as utils
 from datetime import date, datetime
 from calendar import monthrange
-import platform
 
 # Methods to extract count and size of photos/videos for each month
 
@@ -96,30 +95,11 @@ def increment_type_data(types_dict, a_type, file):
 
 def is_file_in_date_range(file, date_range):
     # TODO: need to get file date, creation date, compare that to date_range
-    file_date = get_creation_date(file)
+    file_date = utils.get_creation_date(file)
     return date_range.is_in_date_range(file_date)
 
 
-def get_creation_date(path_to_file):
-    """
-    Try to get the date that a file was created, falling back to when it was
-    last modified if that isn't possible.
-    See http://stackoverflow.com/a/39501288/1709587 for explanation.
-    """
-    if platform.system() == 'Windows':
-        return datetime.fromtimestamp(os.path.getctime(path_to_file)).date()
-    else:
-        stat = os.stat(path_to_file)
-        try:
-            return datetime.fromtimestamp(stat.st_birthtime).date()
-        except AttributeError:
-            # We're probably on Linux. No easy way to get creation dates here,
-            # so we'll settle for when its content was last modified.
-            return datetime.fromtimestamp(stat.st_mtime).date()
-
-
 def get_types_from_folder(directory, date_range=None):
-
     # extensions
     photo_exts = utils.get_extensions_from_type('photo')
     video_exts = utils.get_extensions_from_type('video')
@@ -138,8 +118,8 @@ def get_types_from_folder(directory, date_range=None):
 
     # initialize count and size
     types_list = ['applephoto', 'livephoto', 'livephotovideo',
-                  'video', 'photo',
-                  'screenshot', 'raw',
+                  'applevideo', 'screenshot',
+                  'photo', 'raw', 'video',
                   'other']
     types_dict = init_types(types_list)
     #print(types_dict)
@@ -254,9 +234,17 @@ def get_sheet_by_name(book, name):
         return None
 
 
-def write_excel(types_dict, existing_file=False, offset=0, filename='types_data.xls', sheetname='Sheet 1'):
+def write_excel(types_dict, directory_name=None, existing_file=False, offset=0, filename='types_data.xls', sheetname='Sheet 1'):
 
     if existing_file:
+        # TODO: allow to read multiple sheets instead of only one
+
+        # if it doesn't exist yet, create it, so that it can be used iteratively
+        if not os.path.isfile(filename):
+            wb = Workbook()
+            sheet1 = wb.add_sheet(sheetname)
+            wb.save(filename)
+
         rb = open_workbook(filename)
 
         #sheet1 = rb.sheet_by_name(sheetname)
@@ -272,7 +260,15 @@ def write_excel(types_dict, existing_file=False, offset=0, filename='types_data.
         # add_sheet is used to create sheet.
         sheet1 = wb.add_sheet(sheetname)
 
+    # initialize column index
     iter = 0
+
+    # if supplied, write folder name to first column
+    if directory_name:
+        sheet1.write(0, iter, 'directory')
+        sheet1.write(offset + 1, iter, directory_name)
+        iter += 1
+
     for a_type, value in types_dict.items():
         sheet1.write(0, iter, a_type + '_count')
         sheet1.write(offset+1, iter, types_dict[a_type]['count'])
@@ -296,7 +292,7 @@ if __name__ == '__main__':
     # TODO: Have a sheet for each month/year or something?
     # TODO: Start with the Exported Photo Library, because month/year is easy by folder
 
-    mode = 'single'
+    mode = 'multiple'
 
     if mode == 'single':
         directory1 = '/Users/sammcdonald/Documents/photos'
@@ -309,7 +305,7 @@ if __name__ == '__main__':
 
         write_excel(types_dict)
     elif mode == 'exportedphotolibrary':
-        year_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020'
+        year_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2016'
 
         month_dirs = [x[0] for x in os.walk(year_dir)]
         month_idx = 0
@@ -318,6 +314,40 @@ if __name__ == '__main__':
                 continue
             print(month_dir)
             types_dict = get_types_from_folder(month_dir)
-            write_excel(types_dict, existing_file=True, offset=month_idx)
+            write_excel(types_dict, directory_name=month_dir, existing_file=True, offset=month_idx)
             month_idx += 1
+    elif mode == 'multiple':
+        # specify the directory to calculate for all subdirectories
+        directory = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2019'
+
+        # specify months to do
+        month_names = ['January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December']
+
+        for month_name in month_names:
+            # specify date range to search for
+            date_range = None
+            if True:
+                date_range = DateRange(year=2019, month=month_name)
+
+            #sub_dirs = [x[0] for x in os.walk(directory)] # recursive
+            sub_dirs = [os.path.join(directory, x) for x in os.listdir(directory) if os.path.isdir(os.path.join(directory, x))]
+            dir_idx = 0
+            for sub_dir in sub_dirs:
+                if sub_dir == directory:
+                    continue
+                print(sub_dir)
+                types_dict = get_types_from_folder(sub_dir, date_range=date_range)
+                write_excel(types_dict, directory_name=sub_dir, existing_file=True, offset=dir_idx, filename='types_'+month_name+'.xls')
+                dir_idx += 1
 

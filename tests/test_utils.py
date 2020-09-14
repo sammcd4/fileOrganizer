@@ -9,9 +9,9 @@ class UtilsTests(unittest.TestCase):
     def assertEmpty(self, obj):
         self.assertEqual(len(obj), 0, "Object is not empty")
 
-    def assertExtensionVariations(self, extensions, **kargs):
+    def assertExtensionVariations(self, extensions, **kwargs):
         for ext in extensions:
-            self.assertCountEqual(utils.get_extension_variations(ext), extensions, kargs)
+            self.assertCountEqual(utils.get_extension_variations(ext), extensions, *kwargs)
 
     def test_get_month_int(self):
         # verify month names and abbreviations can be converted

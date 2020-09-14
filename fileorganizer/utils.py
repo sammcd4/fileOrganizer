@@ -1,6 +1,9 @@
 import os
 import glob
 import calendar
+import filecmp
+import platform
+from datetime import date, datetime
 
 
 def get_month_int(month_str):
@@ -9,6 +12,11 @@ def get_month_int(month_str):
     str_to_num.update(name_to_num) # merge dictionaries
     
     return str_to_num[month_str]
+
+
+def get_month_names():
+    # TODO: test for this way
+    return [name for num, name in enumerate(calendar.month_name)]
 
 
 def get_month_folder_names():
@@ -184,3 +192,47 @@ def MOV_extensions(directory):
 def mkdir(directory):
     if not os.path.isdir(directory):
         os.mkdir(directory)
+
+
+def compare_dirs(dir1, dir2):
+    # Determine the items that exist in both directories
+    d1_contents = set(os.listdir(dir1))
+    d2_contents = set(os.listdir(dir2))
+    common = list(d1_contents & d2_contents)
+    common_files = [f
+                    for f in common
+                    if os.path.isfile(os.path.join(dir1, f))
+                    ]
+    print('Common files:{}'.format(common_files))
+
+    # Compare the directories
+    match, mismatch, errors = filecmp.cmpfiles(dir1, dir2, common_files, shallow=False)
+
+    print('Match:{}'.format(match))
+    print('Mismatch:{}'.format(mismatch))
+    print('Errors:{}'.format(errors))
+
+
+def get_creation_date(path_to_file):
+    """
+    Try to get the date that a file was created, falling back to when it was
+    last modified if that isn't possible.
+    See http://stackoverflow.com/a/39501288/1709587 for explanation.
+    """
+    if platform.system() == 'Windows':
+        creation_time = datetime.fromtimestamp(os.path.getctime(path_to_file)).date()
+    else:
+        stat = os.stat(path_to_file)
+        try:
+            creation_time = datetime.fromtimestamp(stat.st_birthtime).date()
+        except AttributeError:
+            # We're probably on Linux. No easy way to get creation dates here,
+            # so we'll settle for when its content was last modified.
+            creation_time = datetime.fromtimestamp(stat.st_mtime).date()
+
+    # compare supposed creation time with modified time and return earliest time
+    modified_time = datetime.fromtimestamp(os.path.getmtime(path_to_file)).date()
+    if modified_time < creation_time:
+        return modified_time
+    else:
+        return creation_time

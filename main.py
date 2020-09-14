@@ -3,15 +3,15 @@ import fileorganizer.utils as utils
 import os
 from pathlib import Path
 
-mode = 'multcompare'
+mode = 'compare'
 
 # TODO: create one to many comparison scheme instead of just one to one or many in different folders
 
 if mode == 'compare':
 
     # define directories to compare
-    duplicate_dir = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/01 January latest'
-    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2017/01 January'
+    duplicate_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2012/2012_03_Sam Proposal'
+    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2012/After Proposal'
 
     #duplicate_dir = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir2'
     #dir_untouched_original = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir1'
