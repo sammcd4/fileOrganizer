@@ -1,5 +1,6 @@
 import unittest
 from photohistory import get_types_from_folder, DateRange
+import fileorganizer.utils as utils
 
 
 class PhotoHistoryTests(unittest.TestCase):
@@ -7,6 +8,8 @@ class PhotoHistoryTests(unittest.TestCase):
     print_output = False # TODO: actually use this, like photohistory class
     dir1 = '../files/identical/dir1'
     nested_dir1 = '../files/identical/nested_dir1'
+    identical_dir = '../files/identical'
+    init_file = '../files/types_init.xls'
 
     def assert_type_count(self, types_dict, type, count):
         self.assertEqual(types_dict[type]['count'], count,
@@ -27,6 +30,10 @@ class PhotoHistoryTests(unittest.TestCase):
         self.assert_type_count(types_dict, 'video', 1)
         self.assert_type_count(types_dict, 'livephoto', 3)
         self.assert_type_count(types_dict, 'livephotovideo', 3)
+
+        # TODO: Recalculate type count by counting individual sub directories
+        sub_dirs = utils.get_sub_dirs(self.nested_dir1)
+        types_dict_sub1 = get_types_from_folder(self.nested_dir1)
 
     def test_date_range(self):
         # Not in range
@@ -49,6 +56,18 @@ class PhotoHistoryTests(unittest.TestCase):
 
     def test_use_earlier_modified_time(self):
         self.assertTrue(False)
+
+    def test_init_file(self):
+        types_dict = get_types_from_folder(self.identical_dir, drill_down=False, init_file=self.init_file, init_row_idx=1)
+
+        self.assert_type_count(types_dict, 'applephoto', 1)
+        self.assert_type_count(types_dict, 'livephoto', 3)
+
+        types_dict = get_types_from_folder(self.identical_dir, drill_down=False, init_file=self.init_file,
+                                           init_row_idx=2)
+
+        self.assert_type_count(types_dict, 'applephoto', 5)
+        self.assert_type_count(types_dict, 'livephoto', 7)
 
 
 if __name__ == '__main__':

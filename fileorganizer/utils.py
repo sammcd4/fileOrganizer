@@ -1,4 +1,4 @@
-import os
+import os, sys
 import glob
 import calendar
 import filecmp
@@ -15,8 +15,7 @@ def get_month_int(month_str):
 
 
 def get_month_names():
-    # TODO: test for this way
-    return [name for num, name in enumerate(calendar.month_name)]
+    return [name for num, name in enumerate(calendar.month_name) if name]
 
 
 def get_month_folder_names():
@@ -236,3 +235,27 @@ def get_creation_date(path_to_file):
         return modified_time
     else:
         return creation_time
+
+
+def remove_empty_folders(path, removeRoot=True):
+    'Function to remove empty folders'
+    if not os.path.isdir(path):
+        return
+
+    # remove empty subfolders
+    files = os.listdir(path)
+    if len(files):
+        for f in files:
+            fullpath = os.path.join(path, f)
+            if os.path.isdir(fullpath):
+                remove_empty_folders(fullpath)
+
+    # if folder empty, delete it
+    files = os.listdir(path)
+    if len(files) == 0 and removeRoot:
+        print("Removing empty folder:", path)
+        os.rmdir(path)
+
+
+def get_sub_dirs(directory):
+    return [os.path.join(directory, x) for x in os.listdir(directory) if os.path.isdir(os.path.join(directory, x))]

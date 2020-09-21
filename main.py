@@ -10,8 +10,8 @@ mode = 'compare'
 if mode == 'compare':
 
     # define directories to compare
-    duplicate_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2012/2012_03_Sam Proposal'
-    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2012/After Proposal'
+    duplicate_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/05 May old'
+    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/05 May'
 
     #duplicate_dir = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir2'
     #dir_untouched_original = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir1'
@@ -21,6 +21,9 @@ if mode == 'compare':
 
 elif mode == 'compare_exts':
     pass
+elif mode == 'remove_empty_folders':
+    directory = '/Volumes/Seagate 4/Seagate 1 Backup/MusicS'
+    utils.remove_empty_folders(directory, True)
 
 elif mode == 'compare_mult_months':
 

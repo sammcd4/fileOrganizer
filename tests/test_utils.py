@@ -5,6 +5,7 @@ import fileorganizer.utils as utils
 class UtilsTests(unittest.TestCase):
 
     print_output = False
+    nested_dir1 = '../files/identical/nested_dir1'
 
     def assertEmpty(self, obj):
         self.assertEqual(len(obj), 0, "Object is not empty")
@@ -20,6 +21,21 @@ class UtilsTests(unittest.TestCase):
         for idx, name in enumerate(month_names):
             self.assertEqual(utils.get_month_int(name), idx+1)
             self.assertEqual(utils.get_month_int(name[:3]), idx+1)
+
+    def test_get_month_names(self):
+        month_names = ['January',
+                       'February',
+                       'March',
+                       'April',
+                       'May',
+                       'June',
+                       'July',
+                       'August',
+                       'September',
+                       'October',
+                       'November',
+                       'December']
+        self.assertEqual(utils.get_month_names(), month_names)
 
     def test_get_num_files(self):
         pass
@@ -87,6 +103,12 @@ class UtilsTests(unittest.TestCase):
 
         # no match
         self.assertEqual(utils.get_convertible_extensions('.blah'), ['.BLAH'])
+
+    def test_get_subdirs(self):
+        directory = self.nested_dir1
+        expected_subdirs = ['../files/identical/nested_dir1/folder2',
+                            '../files/identical/nested_dir1/folder1']
+        self.assertEqual(utils.get_sub_dirs(directory), expected_subdirs)
 
 
 if __name__ == '__main__':
