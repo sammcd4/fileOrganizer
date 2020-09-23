@@ -2,16 +2,18 @@ import fileorganizer.compare as foc
 import fileorganizer.utils as utils
 import os
 from pathlib import Path
+import datetime
+import time
 
-mode = 'compare'
+mode = 'update_dates'
 
 # TODO: create one to many comparison scheme instead of just one to one or many in different folders
 
 if mode == 'compare':
 
     # define directories to compare
-    duplicate_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/05 May old'
-    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2020/05 May'
+    duplicate_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2016 to sort'
+    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/1_Sam/BYU - Sam/CS 470'
 
     #duplicate_dir = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir2'
     #dir_untouched_original = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir1'
@@ -19,8 +21,42 @@ if mode == 'compare':
     # compare
     foc.compare(duplicate_dir, dir_untouched_original, ignore_extensions=True)
 
-elif mode == 'compare_exts':
-    pass
+elif mode == 'update_dates':
+    directory = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2016 to sort'
+
+    # For all WP_ files in the directory, update only the date to reflect the date in the filename
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+
+        # must be a WP_ file with date encoded into the filename
+        if not filename.startswith('WP_'):
+            continue
+
+        date_str = filename.split('_')[1]
+
+        # ensure that the datestr is all numeric
+        if not date_str.isdigit():
+            continue
+
+        current_datetime = utils.get_creation_date(filepath)
+        mod_time = time.mktime(current_datetime.timetuple())
+        # TODO: This isn't working yet. Need to debug all of this
+
+        # attach file time to datestr
+        mod_time_str = str(mod_time).replace('.0', '')
+        updated_mod_time_str = date_str + mod_time_str[-4:]
+
+        # ensure that the mod time has the right number of characters
+        if not len(updated_mod_time_str) == 12:
+            print('Invalid mod time: {}'.format(updated_mod_time_str))
+            continue
+
+        updated_mod_time = int(updated_mod_time_str)
+
+        print('Updating timestamp of file: {} to {}'.format(filepath, updated_mod_time))
+        #os.utime(filepath, (updated_mod_time, updated_mod_time))
+
+
 elif mode == 'remove_empty_folders':
     directory = '/Volumes/Seagate 4/Seagate 1 Backup/MusicS'
     utils.remove_empty_folders(directory, True)

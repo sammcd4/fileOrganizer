@@ -319,7 +319,7 @@ if __name__ == '__main__':
     # TODO: Write tests for photohistory, including date range filtering
     # TODO: Have a sheet for each month/year or something?
 
-    mode = 'multiple_months'
+    mode = 'multiple'
 
     if mode == 'single':
         #directory1 = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2019'
@@ -337,7 +337,7 @@ if __name__ == '__main__':
         print(types_dict)
 
     elif mode == 'exportedphotolibrary':
-        year = '2017'
+        year = '2016'
         year_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/'+year
 
         month_dirs = [x[0] for x in os.walk(year_dir)]
@@ -351,7 +351,8 @@ if __name__ == '__main__':
             month_idx += 1
     elif mode == 'multiple':
         # specify the directory to calculate for all subdirectories
-        directory = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2018'
+        year = '2016'
+        directory = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/' + year
 
         # specify months to do
         month_names = utils.get_month_names()
@@ -360,7 +361,7 @@ if __name__ == '__main__':
             # specify date range to search for
             date_range = None
             if True:
-                date_range = DateRange(year=2018, month=month_name)
+                date_range = DateRange(year=year, month=month_name)
 
             #sub_dirs = [x[0] for x in os.walk(directory)] # recursive
             dir_idx = 0
@@ -374,7 +375,7 @@ if __name__ == '__main__':
 
     elif mode == 'multiple_months':
         # specify the directory to calculate for all months in a year
-        year = '2017'
+        year = '2015'
         directory = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/' + year
         #directory = '/Users/sammcdonald/Documents/empty'
 
@@ -388,7 +389,7 @@ if __name__ == '__main__':
             if True:
                 date_range = DateRange(year=year, month=month_name)
 
-            types_dict = get_types_from_folder(directory, date_range=date_range, init_file='init_file_'+year+'.xls', init_row_idx=month_idx+1)
+            types_dict = get_types_from_folder(directory, date_range=date_range) # init_file='init_file_'+year+'.xls', init_row_idx=month_idx+1)
             write_excel(types_dict, directory_name=month_name, existing_file=True, offset=month_idx,
                         filename='types_'+year+'.xls')
             month_idx += 1
