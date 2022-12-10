@@ -319,7 +319,7 @@ if __name__ == '__main__':
     # TODO: Write tests for photohistory, including date range filtering
     # TODO: Have a sheet for each month/year or something?
 
-    mode = 'multiple'
+    mode = 'multiple_months'
 
     if mode == 'single':
         #directory1 = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2019'
@@ -337,7 +337,7 @@ if __name__ == '__main__':
         print(types_dict)
 
     elif mode == 'exportedphotolibrary':
-        year = '2016'
+        year = '2020'
         year_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/Exported Photo Library/'+year
 
         month_dirs = [x[0] for x in os.walk(year_dir)]
@@ -375,7 +375,7 @@ if __name__ == '__main__':
 
     elif mode == 'multiple_months':
         # specify the directory to calculate for all months in a year
-        year = '2015'
+        year = '2020'
         directory = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/' + year
         #directory = '/Users/sammcdonald/Documents/empty'
 

@@ -5,18 +5,28 @@ from pathlib import Path
 import datetime
 import time
 
-mode = 'update_dates'
+mode = 'compare'
 
 # TODO: create one to many comparison scheme instead of just one to one or many in different folders
 
-if mode == 'compare':
+if mode == 'exported':
+    # specify which directory to check for duplicates
+    year = '2022'
+    month = '08 August'
+    exported_path = '/Volumes/Seagate 5/Seagate 2 Backup/Photos + Videos/Exported Photo Library'
 
     # define directories to compare
-    duplicate_dir = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2016 to sort'
-    dir_untouched_original = '/Volumes/Seagate 4/Seagate 2 Backup/1_Sam/BYU - Sam/CS 470'
+    duplicate_dir = f'{exported_path}/{year}/{month} old'
+    dir_untouched_original = f'{exported_path}/{year}/{month}'
 
-    #duplicate_dir = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir2'
-    #dir_untouched_original = '/Volumes/Seagate 5/Seagate 2 Backup/_gsdata_/_saved_/Photos + Videos/Exported Photo Library/2017/dir1'
+    # compare
+    foc.compare(duplicate_dir, dir_untouched_original) # exported should all be the similar extensions anyway.
+
+elif mode == 'compare':
+
+    # define directories to compare
+    duplicate_dir = '/Users/sammcdonald/Desktop/Seagate 5/Seagate 2 Backup/1_Sam/Piano Sheet Music'
+    dir_untouched_original = '/Volumes/Seagate 5/Seagate 2 Backup/1_Sam/Piano Sheet Music'
 
     # compare
     foc.compare(duplicate_dir, dir_untouched_original, ignore_extensions=True)
