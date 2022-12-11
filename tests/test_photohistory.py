@@ -1,15 +1,30 @@
 import unittest
 from photohistory import get_types_from_folder, DateRange
 import fileorganizer.utils as utils
+import os
 
 
 class PhotoHistoryTests(unittest.TestCase):
 
     print_output = False # TODO: actually use this, like photohistory class
-    dir1 = '../files/identical/dir1'
-    nested_dir1 = '../files/identical/nested_dir1'
-    identical_dir = '../files/identical'
-    init_file = '../files/types_init.xls'
+
+    def __init__(self, *args, **kwargs):
+        super(PhotoHistoryTests, self).__init__(*args, **kwargs)
+
+        # initialize identical and different directories relative to working directory chosen by test runner
+        current_pathname = os.path.basename(os.path.normpath(os.getcwd()))
+        if current_pathname == 'fileOrganizer':
+            # test runner is running from project directory
+            self.project_dir = os.getcwd()
+
+        elif current_pathname == 'tests':
+            # test runner is running from where this file lives
+            self.project_dir = '../'
+
+        self.identical_dir = self.project_dir + 'files/identical/'
+        self.dir1 = self.identical_dir + 'dir1'
+        self.nested_dir1 = self.identical_dir + 'nested_dir1'
+        self.init_file = self.project_dir + 'types_init.xls'
 
     def assert_type_count(self, types_dict, type, count):
         self.assertEqual(types_dict[type]['count'], count,
@@ -54,6 +69,7 @@ class PhotoHistoryTests(unittest.TestCase):
         self.assert_type_count(types_dict, 'livephoto', 3)
         self.assert_type_count(types_dict, 'livephotovideo', 3)
 
+    @unittest.skip("TODO implement")
     def test_use_earlier_modified_time(self):
         self.assertTrue(False)
 

@@ -8,18 +8,44 @@ class CompareTests(unittest.TestCase):
 
     move_duplicates = False
     print_output = False
-    identical_dir = '../files/identical/'
-    different_dir = '../files/different/'
+    project_dir = '../'
     ignore_extensions = False
+
+    def __init__(self, *args, **kwargs):
+        super(CompareTests, self).__init__(*args, **kwargs)
+
+        # initialize identical and different directories relative to working directory chosen by test runner
+        current_pathname = os.path.basename(os.path.normpath(os.getcwd()))
+        if current_pathname == 'fileOrganizer':
+            # test runner is running from project directory
+            self.project_dir = os.getcwd()
+
+        elif current_pathname == 'tests':
+            # test runner is running from where this file lives
+            self.project_dir = '../'
+
+        self.identical_dir = self.project_dir + 'files/identical/'
+        self.different_dir = self.project_dir + 'files/different/'
+
 
     def assertEmpty(self, obj):
         self.assertEqual(len(obj), 0, "Object is not empty")
 
     def assertDcmpIdentical(self, dcmp):
+        # On mac, .DS_Store files will show up in common_files. remove it
+        actual_common_files = dcmp.common_files.copy()
+        if '.DS_Store' in actual_common_files:
+            actual_common_files.remove('.DS_Store')
 
         # all common file names should also be identical
-        self.assertEqual(dcmp.common_files, dcmp.same_files)
-        self.assertFalse(dcmp.diff_files)
+        self.assertEqual(actual_common_files, dcmp.same_files)
+
+        # On mac, .DS_Store will show up as a diff file. remove it
+        actual_diff_files = dcmp.diff_files.copy()
+        if '.DS_Store' in actual_diff_files:
+            actual_diff_files.remove('.DS_Store')
+
+        self.assertFalse(actual_diff_files)
 
         for sub_dcmp in dcmp.subdirs.values():
             self.assertDcmpIdentical(sub_dcmp)
@@ -136,9 +162,10 @@ class CompareTests(unittest.TestCase):
         self.assertEmpty(dcmp.common_files)
         self.assertEmpty(dcmp.same_files)
 
+    @unittest.skip("TODO implement")
     def test_funny_files(self):
         # TODO: Write this with some given funny files
-        self.assertEqual(True, False)
+        self.assertTrue(False)
 
     def test_diff_same_name(self):
         # Different files (based on content) compare not equal
@@ -209,6 +236,7 @@ class CompareTests(unittest.TestCase):
         if os.path.isdir(comp.duplicates_dir):
             os.rmdir(comp.duplicates_dir)
 
+    @unittest.skip("TODO implement")
     def test_maintain_file_path(self):
         # Ensure that the original file path is preserved when moving the identical file after comparison
         self.assertTrue(False)

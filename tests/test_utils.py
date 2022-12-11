@@ -1,11 +1,27 @@
 import unittest
 import fileorganizer.utils as utils
+import os
 
 
 class UtilsTests(unittest.TestCase):
 
     print_output = False
-    nested_dir1 = '../files/identical/nested_dir1'
+
+    def __init__(self, *args, **kwargs):
+        super(UtilsTests, self).__init__(*args, **kwargs)
+
+        # initialize identical and different directories relative to working directory chosen by test runner
+        current_pathname = os.path.basename(os.path.normpath(os.getcwd()))
+        if current_pathname == 'fileOrganizer':
+            # test runner is running from project directory
+            self.project_dir = os.getcwd()
+
+        elif current_pathname == 'tests':
+            # test runner is running from where this file lives
+            self.project_dir = '../'
+
+        self.identical_dir = self.project_dir + 'files/identical/'
+        self.different_dir = self.project_dir + 'files/different/'
 
     def assertEmpty(self, obj):
         self.assertEqual(len(obj), 0, "Object is not empty")
@@ -105,9 +121,9 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(utils.get_convertible_extensions('.blah'), ['.BLAH'])
 
     def test_get_subdirs(self):
-        directory = self.nested_dir1
-        expected_subdirs = ['../files/identical/nested_dir1/folder2',
-                            '../files/identical/nested_dir1/folder1']
+        directory = self.identical_dir + 'nested_dir1/'
+        expected_subdirs = [self.identical_dir + 'nested_dir1/folder2',
+                            self.identical_dir + 'nested_dir1/folder1']
         self.assertEqual(utils.get_sub_dirs(directory), expected_subdirs)
 
 
