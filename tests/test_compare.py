@@ -42,6 +42,10 @@ class CompareTests(unittest.TestCase):
         result = comp.compare_folders('', '')
         self.assertEqual(result, None)
 
+    def test_files_path(self):
+        self.assertTrue(os.path.isdir(self.identical_dir))
+        self.assertTrue(os.path.isdir(self.different_dir))
+
     def test_all_identical(self):
 
         # Identical files (name and content) compare equal
