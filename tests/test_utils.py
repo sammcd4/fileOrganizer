@@ -14,7 +14,7 @@ class UtilsTests(unittest.TestCase):
         current_pathname = os.path.basename(os.path.normpath(os.getcwd()))
         if current_pathname == 'fileOrganizer':
             # test runner is running from project directory
-            self.project_dir = os.getcwd()
+            self.project_dir = ''
 
         elif current_pathname == 'tests':
             # test runner is running from where this file lives
@@ -95,8 +95,8 @@ class UtilsTests(unittest.TestCase):
         self.assertCountEqual(raw_exts, utils.get_extensions_from_type('raw'))
 
     def test_get_extensions(self):
-        self.assertEqual(utils.get_extensions('../files/identical/diffext1'), ['.JPEG', '.JPG'])
-        self.assertEqual(utils.get_extensions('../files/identical/dir1'), ['.JPG', '.mp4', '.mov'])
+        self.assertEqual(utils.get_extensions(self.identical_dir + 'diffext1'), ['.JPEG', '.JPG'])
+        self.assertEqual(utils.get_extensions(self.identical_dir + 'dir1'), ['.JPG', '.mp4', '.mov'])
         # TODO: Should the order matter?
 
     def test_get_convertible_extensions(self):

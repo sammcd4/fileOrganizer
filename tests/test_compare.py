@@ -18,7 +18,7 @@ class CompareTests(unittest.TestCase):
         current_pathname = os.path.basename(os.path.normpath(os.getcwd()))
         if current_pathname == 'fileOrganizer':
             # test runner is running from project directory
-            self.project_dir = os.getcwd()
+            self.project_dir = ''
 
         elif current_pathname == 'tests':
             # test runner is running from where this file lives
@@ -140,6 +140,7 @@ class CompareTests(unittest.TestCase):
     def test_orig_directory_untouched(self):
         pass
 
+    @unittest.skip("TODO implement")
     def test_identical_diffname(self):
 
         # TODO: {feature: compare_diff_name} Need to design tasks for this feature

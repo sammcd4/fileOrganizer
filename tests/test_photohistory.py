@@ -15,7 +15,7 @@ class PhotoHistoryTests(unittest.TestCase):
         current_pathname = os.path.basename(os.path.normpath(os.getcwd()))
         if current_pathname == 'fileOrganizer':
             # test runner is running from project directory
-            self.project_dir = os.getcwd()
+            self.project_dir = ''
 
         elif current_pathname == 'tests':
             # test runner is running from where this file lives
