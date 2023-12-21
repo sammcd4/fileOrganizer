@@ -69,10 +69,6 @@ class PhotoHistoryTests(unittest.TestCase):
         self.assert_type_count(types_dict, 'livephoto', 3)
         self.assert_type_count(types_dict, 'livephotovideo', 3)
 
-    @unittest.skip("TODO implement")
-    def test_use_earlier_modified_time(self):
-        self.assertTrue(False)
-
     def test_init_file(self):
         types_dict = get_types_from_folder(self.identical_dir, drill_down=False, init_file=self.init_file, init_row_idx=1)
 

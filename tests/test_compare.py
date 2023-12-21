@@ -138,19 +138,6 @@ class CompareTests(unittest.TestCase):
     def test_orig_directory_untouched(self):
         pass
 
-    @unittest.skip("TODO implement")
-    def test_identical_diffname(self):
-
-        # TODO: {feature: compare_diff_name} Need to design tasks for this feature
-        # Identical files (but different filenames) compare equal
-        comp = self.compare_identical_dirs('diffname1', 'diffname2')
-
-        self.assertFalse(comp.left_only_found)
-        self.assertFalse(comp.right_only_found)
-
-        self.assertEqual(len(comp.dcmp.common_files), len(comp.dcmp.same_files))
-        self.assertFalse(comp.dcmp.diff_files)
-
     def test_all_diff(self):
 
         # Different files (name and content) compare not equal
@@ -160,11 +147,6 @@ class CompareTests(unittest.TestCase):
         # there should be no common files (files of same name) and no same files (identical files)
         self.assertEmpty(dcmp.common_files)
         self.assertEmpty(dcmp.same_files)
-
-    @unittest.skip("TODO implement")
-    def test_funny_files(self):
-        # TODO: Write this with some given funny files
-        self.assertTrue(False)
 
     def test_diff_same_name(self):
         # Different files (based on content) compare not equal
@@ -234,11 +216,6 @@ class CompareTests(unittest.TestCase):
         # No logic so far to remove empty duplicates folder, but in this case it will be empty and need removal
         if os.path.isdir(comp.duplicates_dir):
             os.rmdir(comp.duplicates_dir)
-
-    @unittest.skip("TODO implement")
-    def test_maintain_file_path(self):
-        # Ensure that the original file path is preserved when moving the identical file after comparison
-        self.assertTrue(False)
 
 
 if __name__ == '__main__':
