@@ -106,7 +106,6 @@ class CompareTests(unittest.TestCase):
         dcmp = comp.dcmp
 
         # if identical, no unique files in either directory
-        # TODO: This is currently passing for the wrong reason. these aren't ever filled
         self.assertEmpty(comp.left_only_found)
         self.assertEmpty(comp.right_only_found)
 
@@ -117,16 +116,15 @@ class CompareTests(unittest.TestCase):
         # Cleanup
         self.ignore_extensions = False
 
-    def test_identical_diffext2(self):
+    def test_identical_diffext_swapped(self):
         # Setup
         self.ignore_extensions = True
 
         # Identical files (but different extensions) compare equal
-        comp = self.compare_identical_dirs('diffext3', 'diffext4')
+        comp = self.compare_identical_dirs('diffext2', 'diffext1')
         dcmp = comp.dcmp
 
         # if identical, no unique files in either directory
-        # TODO: This is currently passing for the wrong reason. these aren't ever filled
         self.assertEmpty(comp.left_only_found)
         self.assertEmpty(comp.right_only_found)
 
