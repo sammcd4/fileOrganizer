@@ -1,1 +1,2 @@
 *.xls
+tests/__pycache__/*
