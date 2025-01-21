@@ -5,7 +5,7 @@ from pathlib import Path
 import datetime
 import time
 
-mode = 'compare'
+mode = 'compare_exported_by_year'
 
 # TODO: create one to many comparison scheme instead of just one to one or many in different folders
 
@@ -25,11 +25,32 @@ if mode == 'exported':
 elif mode == 'compare':
 
     # define directories to compare
-    duplicate_dir = '/Users/sammcdonald/Desktop/Seagate 5/Seagate 2 Backup/1_Sam/Piano Sheet Music'
-    dir_untouched_original = '/Volumes/Seagate 5/Seagate 2 Backup/1_Sam/Piano Sheet Music'
+    duplicate_dir = '/Volumes/Seagate 5/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2023 to check/03 March_old'
+    dir_untouched_original = '/Volumes/Seagate 5/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2023 to check/03 March'
 
     # compare
-    foc.compare(duplicate_dir, dir_untouched_original, ignore_extensions=True)
+    foc.compare(duplicate_dir, dir_untouched_original, ignore_extensions=False)
+
+elif mode == 'compare_exported_by_year':
+    orig_year_dir = '/Volumes/Seagate 5/Seagate 2 Backup/Photos + Videos/Exported Photo Library/2023'
+    duplicate_year_dir = '/Users/sammcdonald/Pictures/Exported/2023'
+    dirs = ['01 January',
+            '02 February',
+            '03 March',
+            '04 April',
+            '05 May',
+            '06 June',
+            '07 July',
+            '08 August',
+            '09 September',
+            '10 October',
+            '11 November',
+            '12 December']
+    
+    for dir in dirs:
+        dir_untouched_original = os.path.join(orig_year_dir, dir)
+        duplicate_dir = os.path.join(duplicate_year_dir, dir)
+        foc.compare(duplicate_dir, dir_untouched_original)
 
 elif mode == 'update_dates':
     directory = '/Volumes/Seagate 4/Seagate 2 Backup/Photos + Videos/2016 to sort'
